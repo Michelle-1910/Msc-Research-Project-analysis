@@ -10,6 +10,6 @@ s2c <- dplyr::select(s2c, sample = Run, condition = disease)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
 s2c
 {library("sleuth")}
-so <- sleuth_prep(s2c, read_bootstrap_tpm = TRUE , extra_bootstrap_summary = TRUE)
-so <- sleuth_fit(so, ~condition, 'full')
+so <- sleuth_prep(s2c, ~condition, read_bootstrap_tpm = TRUE , extra_bootstrap_summary = TRUE)
+so <- sleuth_fit(so)
 so
