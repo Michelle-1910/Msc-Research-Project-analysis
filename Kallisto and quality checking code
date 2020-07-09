@@ -1,0 +1,56 @@
+#!/bin/bash
+
+#########Doing quality checking of the reads###########
+
+echo $"Now Running FastQC for the Samples" | sed $'s/Now Running FastQC for the Samples/\e[32m&\e[0m/';
+
+for sample in `cat list.txt`
+do
+
+    fastqc ${sample}_1.fastq.gz ${sample}_2.fastq.gz
+
+done
+
+echo $"Now Running MultiQC for the Samples" | sed $'s/Now Running MultiQC for the Samples/\e[36m&\e[0m/';
+
+multiqc .
+
+echo $"Now carrying out quality trimming of the reads." | sed $'s/Now carrying out quality trimming of the reads./\e[36m&\e[0m/';
+
+
+for sample in `cat list.txt`
+do
+        /s/software/anaconda/python3/bin/cutadapt --trim-n -a "A{100}" -A "A{100}" -o ${sample}_1NEW.fastq.gz -p ${sample}_2NEW.fastq.gz ${sample}_1.fastq.gz ${sample}_2.fastq.gz
+done
+
+
+for sample in `cat list.txt`
+do
+        #mv ${sample}_1NEW.fastq.gz ${sample}_1.fastq.gz
+        #mv ${sample}_2NEW.fastq.gz ${sample}_2.fastq.gz
+done
+
+##########Carryingout differential expression analysis using alignment free approach Kallisto##############
+
+
+######convert the human transcriptome into an index for Kallisto needed to carryout the pseudoalignment#####
+
+echo $"Now creating an index for pseudoalignment with Kallisto." | sed $'s/Now creating an index for pseudoalignment with Kallisto./\e[36m&\e[0m/';
+
+/d/in7/s/kallisto/kallisto_linux-v0.46.1/kallisto index --index=Homo_sapiens.GRCh38.cdna.all.fa.index /d/in13/u/ubcg71a/research/genomes/h.sapiens/GRCh38_kallisto/Homo_sapiens.GRCh38.cdna.all.fa.gz
+
+#############Carrying out the Kallisto quantification step for generating abundance estimates######
+
+echo $"Now generating abundance estimates." | sed $'s/Now generating abundance estimates./\e[36m&\e[0m/';
+
+
+for sample in `cat list.txt`
+do
+        R1=${sample}_1.fastq.gz
+        R2=${sample}_2.fastq.gz
+
+d/in7/s/kallisto/kallisto_linux-v0.46.1/kallisto quant --rf-stranded --threads=8 -b 100 --index=Homo_sapiens.GRCh38.cdna.all.fa.index --output-dir=${sample}_result $R1 $R2
+
+done
+
+
