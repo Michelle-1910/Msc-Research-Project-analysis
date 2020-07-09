@@ -26,8 +26,8 @@ done
 
 for sample in `cat list.txt`
 do
-        #mv ${sample}_1NEW.fastq.gz ${sample}_1.fastq.gz
-        #mv ${sample}_2NEW.fastq.gz ${sample}_2.fastq.gz
+        mv ${sample}_1NEW.fastq.gz ${sample}_1.fastq.gz
+        mv ${sample}_2NEW.fastq.gz ${sample}_2.fastq.gz
 done
 
 ##########Carryingout differential expression analysis using alignment free approach Kallisto##############
