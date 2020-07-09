@@ -1,15 +1,70 @@
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install()
+##Installing sleuth packages
 BiocManager::install(c("rhdf5"))
 install.packages("devtools")
-devtools::install_github("pachterlab/sleuth")
+#devtools::install_github("pachterlab/sleuth")
+BiocManager::install("pachterlab/sleuth")
+BiocManager::install(c("biomaRt"))
+BiocManager::install(c("cowplot"))
+library('sleuth')
+library('biomaRt')
+library('cowplot')
+
+##Setting up variables containing paths and directories for which the Kallisto results are found
 sample_id <- dir(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\"))
 sample_id
+
 kal_dirs <- file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\", sample_id)
 kal_dirs
+
+##Reading in the meta data to a variable
 s2c <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\metadata\\SraRunTable.txt"), header = TRUE, stringsAsFactors=FALSE, sep = ",")
-s2c <- dplyr::select(s2c, sample = Run, condition = disease)
+s2c <- dplyr::select(s2c, sample = Run, condition = Tumour)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
 s2c
-{library("sleuth")}
-so <- sleuth_prep(s2c, ~condition, read_bootstrap_tpm = TRUE , extra_bootstrap_summary = TRUE)
-so <- sleuth_fit(so)
-so
+
+##Associating transcripts to genes
+mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",dataset = "hsapiens_gene_ensembl",host = "dec2015.archive.ensembl.org")
+
+t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "transcript_version", "ensembl_gene_id", "external_gene_name", "description","transcript_biotype"),mart = mart)
+t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
+t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
+head(t2g)
+t2g
+
+
+##Differential expression
+#Preparing the analysis object
+design <- ~condition
+so <- sleuth_prep(s2c, full_model = design, read_bootstrap_tpm = TRUE, extra_bootstrap_summary=TRUE, target_mapping = t2g, transform_fun_counts = function(x) log2(x + 0.5),  aggregation_column = 'ens_gene') 
+
+#The analysis
+so <- sleuth_fit(so, ~condition, 'full')
+
+#do a Wald test
+so <- sleuth_wt(so, which_beta='conditionControl', which_model='full')
+sleuth_table_wt <- sleuth_results(so, test= 'conditionControl', test_type = 'wt',which_model = 'full',show_all = TRUE)
+dim(sleuth_table_wt)
+
+sleuth_table_wt[1:5,]
+sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
+#significant genes: 2328
+dim(sleuth_significant_wt)
+head(sleuth_significant_wt, 20)
+
+#LRT test
+so <- sleuth_fit(so, ~1, 'null')
+so <- sleuth_lrt(so, 'null', 'full')
+sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
+sleuth_table_lrt[1:5,]
+sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
+dim(sleuth_significant_lrt)
+head(sleuth_significant_lrt, 20)
+
+#check counts for top significant genes in WT
+selected_gene <- sleuth_significant_wt$target_id[1]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+
+
