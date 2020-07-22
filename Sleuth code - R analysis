@@ -7,10 +7,9 @@ install.packages("devtools")
 #devtools::install_github("pachterlab/sleuth")
 BiocManager::install("pachterlab/sleuth")
 BiocManager::install(c("biomaRt"))
-BiocManager::install(c("cowplot"))
+BiocManager::install(c("gridExtra"))
 library('sleuth')
 library('biomaRt')
-library('cowplot')
 
 ##Setting up variables containing paths and directories for which the Kallisto results are found
 sample_id <- dir(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\"))
@@ -29,11 +28,11 @@ s2c
 mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",dataset = "hsapiens_gene_ensembl",host = "dec2015.archive.ensembl.org")
 
 t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "transcript_version", "ensembl_gene_id", "external_gene_name", "description","transcript_biotype"),mart = mart)
-t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
+head(t2g)
+t2g$ensembl_transcript_id_version = paste(t2g$ensembl_transcript_id, t2g$transcript_version, sep=".")
+t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id_version,ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
 t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
 head(t2g)
-t2g
-
 
 ##Differential expression
 #Preparing the analysis object
@@ -50,21 +49,112 @@ dim(sleuth_table_wt)
 
 sleuth_table_wt[1:5,]
 sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
-#significant genes: 2328
-dim(sleuth_significant_wt)
-head(sleuth_significant_wt, 20)
 
-#LRT test
+#significant genes
+dim(sleuth_significant_wt)
+head(sleuth_significant_wt, 3)
+
+#then a LRT test
 so <- sleuth_fit(so, ~1, 'null')
 so <- sleuth_lrt(so, 'null', 'full')
 sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
 sleuth_table_lrt[1:5,]
 sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
 dim(sleuth_significant_lrt)
-head(sleuth_significant_lrt, 20)
+head(sleuth_significant_lrt, 3)
+
 
 #check counts for top significant genes in WT
 selected_gene <- sleuth_significant_wt$target_id[1]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
 
+selected_gene <- sleuth_significant_wt$target_id[2]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+
+selected_gene <- sleuth_significant_wt$target_id[3]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+
+#saving the gene differential expression results 
+#check the table has no duplicate entries
+length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
+write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
+write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
+
+
+##### TRANSCRIPT-LEVEL ANALYSIS #####
+
+sleuth_table_txn <- sleuth_results(so, test = 'conditionControl',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
+dim(sleuth_table_txn)
+
+sleuth_table_txn[1:5,]
+sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
+dim(sleuth_significant_txn)
+head(sleuth_significant_txn, 3)
+
+write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")  
+
+#the transcript table contains beta values too so one can talk about up and down regulated transcripts and genes
+sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
+head(sleuth_significant_txn.up, 4)
+
+#how many genes are upregulated? 
+length(unique(sleuth_significant_txn.up$ens_gene))
+
+#saving the gene ids
+write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
+head(sleuth_significant_txn.down, 4)
+
+#how many genes are downpregulated? 
+length(unique(sleuth_significant_txn.down$ens_gene))
+write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+
+######## SUMMARY OF NUMBERS  ##########
+#all transcripts and genes included initially in the analysis: 
+length(sleuth_table_txn$target_id)
+length(sleuth_table_wt$target_id)
+
+#note that numbers of genes in the transcript table and number of genes in the gene table are not exactly equal
+length(unique(sleuth_table_txn$ens_gene))
+
+#significantly DE genes (aggregated) in the gene results table at q<0.05
+length(sleuth_significant_wt$target_id)
+
+#significantly DE transcripts in the transcript results table
+length(sleuth_significant_txn$target_id) 
+
+#how many genes correspond to the transcripts above? 
+length(unique(sleuth_significant_txn$ens_gene))
+
+plot_pca(so,color_by = 'condition',text_labels = TRUE)
+
+plot_pca(so,color_by = 'condition',text_labels = TRUE, units="tpm")
+
+plot_pca(so,pc_x=2,pc_y=3,color_by = 'condition',text_labels = TRUE)
+
+plot_pca(so,pc_x=2,pc_y=8,color_by = 'condition',text_labels = TRUE)
+
+plot_pc_variance(obj = so, units = "est_counts")
+plot_pc_variance(obj = so, units = "tpm")
+
+plot_loadings(so, pc_input=1)
+plot_loadings(so, pc_input=2)
+plot_loadings(so, pc_input=3)
+plot_loadings(so, pc_input=8) 
+
+
+plot_group_density(so,
+                   use_filtered = FALSE,
+                   units = "est_counts",
+                   trans = "log",
+                   grouping = "condition")
+plot_group_density(so,
+                   use_filtered = TRUE,
+                   units = "est_counts",
+                   trans = "log",
+                   grouping = "condition")
+
+install.packages('gridExtra', dependencies=TRUE, repos='http://cran.rstudio.com/')
+library(gridExtra)
+plot_sample_heatmap(so)
 
