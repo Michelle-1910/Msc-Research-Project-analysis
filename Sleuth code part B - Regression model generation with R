@@ -108,7 +108,10 @@ write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\
 write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variable3\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
 
 ##### TRANSCRIPT-LEVEL ANALYSIS #####
-sleuth_table_txn <- sleuth_results(so, test = 'conditionControl',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
+sleuth_table_txn <- sleuth_results(so, test = 'tissue_stateNon_glial',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
+sleuth_table_txn <- sleuth_results(so, test = 'conditionFetal',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
+sleuth_table_txn <- sleuth_results(so, test = 'conditionNFPA',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
+
 dim(sleuth_table_txn)
 sleuth_table_txn[1:5,]
 sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
