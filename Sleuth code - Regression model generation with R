@@ -29,32 +29,30 @@ mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",dataset = "hsapiens_ge
 
 t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "transcript_version", "ensembl_gene_id", "external_gene_name", "description","transcript_biotype"),mart = mart)
 head(t2g)
+
 t2g$ensembl_transcript_id_version = paste(t2g$ensembl_transcript_id, t2g$transcript_version, sep=".")
 t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id_version,ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
 t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
 head(t2g)
 
+
 ##Differential expression
 #Preparing the analysis object
 design <- ~condition
 so <- sleuth_prep(s2c, full_model = design, read_bootstrap_tpm = TRUE, extra_bootstrap_summary=TRUE, target_mapping = t2g, transform_fun_counts = function(x) log2(x + 0.5),  aggregation_column = 'ens_gene') 
-
 #The analysis
 so <- sleuth_fit(so, ~condition, 'full')
 
-#do a Wald test
+#Wald test
 so <- sleuth_wt(so, which_beta='conditionControl', which_model='full')
 sleuth_table_wt <- sleuth_results(so, test= 'conditionControl', test_type = 'wt',which_model = 'full',show_all = TRUE)
 dim(sleuth_table_wt)
-
-sleuth_table_wt[1:5,]
 sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
-
-#significant genes
+#significant genes: 
 dim(sleuth_significant_wt)
 head(sleuth_significant_wt, 3)
 
-#then a LRT test
+#LRT test
 so <- sleuth_fit(so, ~1, 'null')
 so <- sleuth_lrt(so, 'null', 'full')
 sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
@@ -64,7 +62,7 @@ dim(sleuth_significant_lrt)
 head(sleuth_significant_lrt, 3)
 
 
-#check counts for top significant genes in WT
+#counts for top significant genes in Wald Test
 selected_gene <- sleuth_significant_wt$target_id[1]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
 
@@ -75,73 +73,82 @@ selected_gene <- sleuth_significant_wt$target_id[3]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
 
 #saving the gene differential expression results 
-#check the table has no duplicate entries
-length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
-write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
-write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
 
+#checking the table has no duplicate entries
+length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
+
+write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variable2\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
+write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variable2\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
 
 ##### TRANSCRIPT-LEVEL ANALYSIS #####
-
 sleuth_table_txn <- sleuth_results(so, test = 'conditionControl',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
 dim(sleuth_table_txn)
-
 sleuth_table_txn[1:5,]
 sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
-dim(sleuth_significant_txn)
+dim(sleuth_significant_txn) 
 head(sleuth_significant_txn, 3)
 
-write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")  
+#saving the results
+write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variable2\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")  
 
-#the transcript table contains beta values too so one can talk about up and down regulated transcripts and genes
+#determining up and down regulated transcripts and genes
 sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
+dim(sleuth_significant_txn.up)
 head(sleuth_significant_txn.up, 4)
 
 #how many genes are upregulated? 
 length(unique(sleuth_significant_txn.up$ens_gene))
 
-#saving the gene ids
-write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
-sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
+#saving the gene ids instead of transcript ones
+write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variable2\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0))
 head(sleuth_significant_txn.down, 4)
 
 #how many genes are downpregulated? 
 length(unique(sleuth_significant_txn.down$ens_gene))
-write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variable2\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
 
-######## SUMMARY OF NUMBERS  ##########
+######## SUMMARY OF NUMBERS ##########
 #all transcripts and genes included initially in the analysis: 
 length(sleuth_table_txn$target_id)
 length(sleuth_table_wt$target_id)
 
-#note that numbers of genes in the transcript table and number of genes in the gene table are not exactly equal
+#the uniquely expressed transcripts
 length(unique(sleuth_table_txn$ens_gene))
 
-#significantly DE genes (aggregated) in the gene results table at q<0.05
+#significantly DE genes (aggregated) in the gene results table at q<0.05 
 length(sleuth_significant_wt$target_id)
 
 #significantly DE transcripts in the transcript results table
 length(sleuth_significant_txn$target_id) 
 
-#how many genes correspond to the transcripts above? 
+#how many genes correspond to the above transcripts?
 length(unique(sleuth_significant_txn$ens_gene))
 
+
+### Exploratory Data Analysis###
+
+plot_pca(so,color_by = 'condition',text_labels = FALSE)
 plot_pca(so,color_by = 'condition',text_labels = TRUE)
 
 plot_pca(so,color_by = 'condition',text_labels = TRUE, units="tpm")
+plot_pca(so,color_by = 'condition',text_labels = FALSE, units="tpm")
 
+plot_pca(so,pc_x=2,pc_y=3,color_by = 'condition',text_labels = FALSE)
 plot_pca(so,pc_x=2,pc_y=3,color_by = 'condition',text_labels = TRUE)
 
+plot_pca(so,pc_x=2,pc_y=8,color_by = 'condition',text_labels = FALSE)
 plot_pca(so,pc_x=2,pc_y=8,color_by = 'condition',text_labels = TRUE)
 
+#how much of the variance is accounted for by each PC?
 plot_pc_variance(obj = so, units = "est_counts")
 plot_pc_variance(obj = so, units = "tpm")
+
 
 plot_loadings(so, pc_input=1)
 plot_loadings(so, pc_input=2)
 plot_loadings(so, pc_input=3)
 plot_loadings(so, pc_input=8) 
-
 
 plot_group_density(so,
                    use_filtered = FALSE,
@@ -154,7 +161,6 @@ plot_group_density(so,
                    trans = "log",
                    grouping = "condition")
 
-install.packages('gridExtra', dependencies=TRUE, repos='http://cran.rstudio.com/')
-library(gridExtra)
-plot_sample_heatmap(so)
 
+library(ggplot2)
+plot_sample_heatmap(so)
