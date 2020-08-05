@@ -7,25 +7,6 @@ install.packages("devtools")
 #devtools::install_github("pachterlab/sleuth")
 BiocManager::install("pachterlab/sleuth")
 BiocManager::install(c("biomaRt"))
-BiocManager::install(c("gridExtra"))
-library('sleuth')
-library('biomaRt')
-
-##Setting up variables containing paths and directories for which the Kallisto results are found
-sample_id <- dir(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\"))
-sample_id
-
-kal_dirs <- file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\", sample_id)
-kal_dirsif (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-BiocManager::install()
-##Installing sleuth packages
-BiocManager::install(c("rhdf5"))
-install.packages("devtools")
-#devtools::install_github("pachterlab/sleuth")
-BiocManager::install("pachterlab/sleuth")
-BiocManager::install(c("biomaRt"))
-BiocManager::install(c("gridExtra"))
 library('sleuth')
 library('biomaRt')
 
@@ -38,7 +19,7 @@ kal_dirs
 
 ##Reading in the meta data to a variable
 s2c <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\metadata\\SraRunTable.txt"), header = TRUE, stringsAsFactors=FALSE, sep = ",")
-s2c <- dplyr::select(s2c, sample = Run, condition = Type, tissue_state = Reactivetissue)
+s2c <- dplyr::select(s2c, sample = Run, condition = Type)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
 s2c
 
