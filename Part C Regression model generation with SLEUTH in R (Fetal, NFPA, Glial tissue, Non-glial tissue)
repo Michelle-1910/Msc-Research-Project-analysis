@@ -116,10 +116,10 @@ models(so)
 #####GENE-LEVEL ANALYSIS#####
 #do a Wald test 
 so <- sleuth_wt(so, which_beta='conditionFetal', which_model='full')
-dim(sleuth_table_wt)
+
 
 sleuth_table_wt <- sleuth_results(so, test= 'conditionFetal', test_type = 'wt',which_model = 'full',show_all = TRUE)
-
+dim(sleuth_table_wt)
 #significant genes: 
 sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
 dim(sleuth_significant_wt)
@@ -205,9 +205,9 @@ length(unique(sleuth_significant_txn$ens_gene))
 #####GENE-LEVEL ANALYSIS#####
 #do a Wald test 
 so <- sleuth_wt(so, which_beta='conditionNFPA', which_model='full')
-dim(sleuth_table_wt)
 
 sleuth_table_wt <- sleuth_results(so, test= 'conditionNFPA', test_type = 'wt',which_model = 'full',show_all = TRUE)
+dim(sleuth_table_wt)
 
 #significant genes: 
 sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
@@ -294,9 +294,9 @@ length(unique(sleuth_significant_txn$ens_gene))
 #####GENE-LEVEL ANALYSIS#####
 #do a Wald test 
 so <- sleuth_wt(so, which_beta='tissue_stateNon_glial', which_model='full')
-dim(sleuth_table_wt)
 
 sleuth_table_wt <- sleuth_results(so, test= 'tissue_stateNon_glial', test_type = 'wt',which_model = 'full',show_all = TRUE)
+dim(sleuth_table_wt)
 
 #significant genes: 
 sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
