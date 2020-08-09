@@ -200,3 +200,41 @@ length(sleuth_significant_txn$target_id)
 #how many genes correspond to the above transcripts?
 length(unique(sleuth_significant_txn$ens_gene))
 
+### Exploratory Data Analysis###
+
+plot_pca(so,color_by = 'condition',text_labels = FALSE)
+plot_pca(so,color_by = 'condition',text_labels = TRUE)
+
+plot_pca(so,color_by = 'condition',text_labels = TRUE, units="tpm")
+plot_pca(so,color_by = 'condition',text_labels = FALSE, units="tpm")
+
+plot_pca(so,pc_x=2,pc_y=3,color_by = 'condition',text_labels = FALSE)
+plot_pca(so,pc_x=2,pc_y=3,color_by = 'condition',text_labels = TRUE)
+
+plot_pca(so,pc_x=2,pc_y=8,color_by = 'condition',text_labels = FALSE)
+plot_pca(so,pc_x=2,pc_y=8,color_by = 'condition',text_labels = TRUE)
+
+#how much of the variance is accounted for by each PC?
+plot_pc_variance(obj = so, units = "est_counts")
+plot_pc_variance(obj = so, units = "tpm")
+
+
+plot_loadings(so, pc_input=1)
+plot_loadings(so, pc_input=2)
+plot_loadings(so, pc_input=3)
+plot_loadings(so, pc_input=8) 
+
+plot_group_density(so,
+                   use_filtered = FALSE,
+                   units = "est_counts",
+                   trans = "log",
+                   grouping = "condition")
+plot_group_density(so,
+                   use_filtered = TRUE,
+                   units = "est_counts",
+                   trans = "log",
+                   grouping = "condition")
+
+
+library(ggplot2)
+plot_sample_heatmap(so)
