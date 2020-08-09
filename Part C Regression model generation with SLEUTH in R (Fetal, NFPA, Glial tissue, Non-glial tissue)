@@ -19,7 +19,7 @@ kal_dirs
 
 ##Reading in the meta data to a variable
 s2c <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\metadata\\SraRunTable.txt"), header = TRUE, stringsAsFactors=FALSE, sep = ",")
-s2c <- dplyr::select(s2c, sample = Run, condition = Type, tissue_state = Reactivetissue)
+s2c <- dplyr::select(s2c, sample = Run, condition = Reactivetissue)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
 s2c
 
@@ -103,7 +103,7 @@ check_target_mapping <- function(t2g, target_mapping, gene_mode) {
 
 ##Differential expression
 #Preparing the analysis object
-design <- ~condition + tissue_state
+design <- ~condition 
 so <- sleuth_prep(s2c, full_model = design, read_bootstrap_tpm = TRUE, extra_bootstrap_summary=TRUE, target_mapping = t2g, transform_fun_counts = function(x) log2(x + 0.5),  aggregation_column = 'ens_gene') 
 
 #The analysis
@@ -111,14 +111,14 @@ so <- sleuth_fit(so, design, 'full')
 
 models(so)
 
-##Handling the Fetal(control)vsACP(tumour)##
+##Handling the GlialvsNon-glialvsFetalvsNFPA##
 
 #####GENE-LEVEL ANALYSIS#####
 #do a Wald test 
-so <- sleuth_wt(so, which_beta='conditionFetal', which_model='full')
+so <- sleuth_wt(so, which_beta='conditionGlial', which_model='full')
 
 
-sleuth_table_wt <- sleuth_results(so, test= 'conditionFetal', test_type = 'wt',which_model = 'full',show_all = TRUE)
+sleuth_table_wt <- sleuth_results(so, test= 'conditionGlial', test_type = 'wt',which_model = 'full',show_all = TRUE)
 dim(sleuth_table_wt)
 #significant genes: 
 sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
@@ -149,11 +149,11 @@ plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$targe
 #checking the table has no duplicate entries
 length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
 
-write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_Fetal_ACP_Glial\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
-write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_Fetal_ACP_Glial\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
+write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
+write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
 
 ##### TRANSCRIPT-LEVEL ANALYSIS #####
-sleuth_table_txn <- sleuth_results(so, test = 'conditionFetal',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
+sleuth_table_txn <- sleuth_results(so, test = 'conditionGlial',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
 dim(sleuth_table_txn)
 sleuth_table_txn[1:5,]
 
@@ -163,7 +163,7 @@ dim(sleuth_significant_txn)
 head(sleuth_significant_txn, 3)
 
 #saving the results
-write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_Fetal_ACP_Glial\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id") 
+write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id") 
 #determining up and down regulated transcripts and genes
 sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
 dim(sleuth_significant_txn.up)
@@ -173,191 +173,13 @@ head(sleuth_significant_txn.up, 4)
 length(unique(sleuth_significant_txn.up$ens_gene))
 
 #saving the gene ids instead of transcript ones
-write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_Fetal_ACP_Glial\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
 sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
 head(sleuth_significant_txn.down, 4)
 
 #how many genes are downpregulated? 
 length(unique(sleuth_significant_txn.down$ens_gene))
-write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_Fetal_ACP_Glial\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
-
-####### SUMMARY OF NUMBERS ##########
-#all transcripts included initially in the analysis: 
-length(sleuth_table_txn$target_id)
-
-#all transcripts included initially in the analysis:
-length(sleuth_table_wt$target_id)
-
-#the number of genes in the transcript table
-length(unique(sleuth_table_txn$ens_gene))
-
-#significantly DE genes (aggregated) in the gene results table at q<0.05 
-length(sleuth_significant_wt$target_id)
-
-#significantly DE transcripts in the transcript results table
-length(sleuth_significant_txn$target_id) 
-
-#how many genes correspond to the above transcripts?
-length(unique(sleuth_significant_txn$ens_gene))
-
-##Handling the NFPA(control)vsACP(tumour)##
-
-#####GENE-LEVEL ANALYSIS#####
-#do a Wald test 
-so <- sleuth_wt(so, which_beta='conditionNFPA', which_model='full')
-
-sleuth_table_wt <- sleuth_results(so, test= 'conditionNFPA', test_type = 'wt',which_model = 'full',show_all = TRUE)
-dim(sleuth_table_wt)
-
-#significant genes: 
-sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
-dim(sleuth_significant_wt)
-head(sleuth_significant_wt, 3)
-
-#LRT test
-so <- sleuth_fit(so, ~1, 'null')
-so <- sleuth_lrt(so, 'null', 'full')
-sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
-sleuth_table_lrt[1:5,]
-sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
-dim(sleuth_significant_lrt)
-head(sleuth_significant_lrt, 3)
-
-#counts for top significant genes in Wald Test
-selected_gene <- sleuth_significant_wt$target_id[1]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-selected_gene <- sleuth_significant_wt$target_id[2]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-selected_gene <- sleuth_significant_wt$target_id[3]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-#saving the gene differential expression results 
-
-#checking the table has no duplicate entries
-length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
-
-write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_NFPA_ACP_Glial\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
-write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_NFPA_ACP_Glial\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
-
-##### TRANSCRIPT-LEVEL ANALYSIS #####
-sleuth_table_txn <- sleuth_results(so, test = 'conditionNFPA',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
-dim(sleuth_table_txn)
-sleuth_table_txn[1:5,]
-
-#significant transcripts:
-sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
-dim(sleuth_significant_txn) 
-head(sleuth_significant_txn, 3)
-
-#saving the results
-write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_NFPA_ACP_Glial\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id") 
-#determining up and down regulated transcripts and genes
-sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
-dim(sleuth_significant_txn.up)
-head(sleuth_significant_txn.up, 4)
-
-#how many genes are upregulated? 
-length(unique(sleuth_significant_txn.up$ens_gene))
-
-#saving the gene ids instead of transcript ones
-write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_NFPA_ACP_Glial\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
-sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
-head(sleuth_significant_txn.down, 4)
-
-#how many genes are downpregulated? 
-length(unique(sleuth_significant_txn.down$ens_gene))
-write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_NFPA_ACP_Glial\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
-
-####### SUMMARY OF NUMBERS ##########
-#all transcripts included initially in the analysis: 
-length(sleuth_table_txn$target_id)
-
-#all transcripts included initially in the analysis:
-length(sleuth_table_wt$target_id)
-
-#the number of genes in the transcript table
-length(unique(sleuth_table_txn$ens_gene))
-
-#significantly DE genes (aggregated) in the gene results table at q<0.05 
-length(sleuth_significant_wt$target_id)
-
-#significantly DE transcripts in the transcript results table
-length(sleuth_significant_txn$target_id) 
-
-#how many genes correspond to the above transcripts?
-length(unique(sleuth_significant_txn$ens_gene))
-
-##Handling the TissuestatevsACP(tumour)##
-
-#####GENE-LEVEL ANALYSIS#####
-#do a Wald test 
-so <- sleuth_wt(so, which_beta='tissue_stateNon_glial', which_model='full')
-
-sleuth_table_wt <- sleuth_results(so, test= 'tissue_stateNon_glial', test_type = 'wt',which_model = 'full',show_all = TRUE)
-dim(sleuth_table_wt)
-
-#significant genes: 
-sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
-dim(sleuth_significant_wt)
-head(sleuth_significant_wt, 3)
-
-#LRT test
-so <- sleuth_fit(so, ~1, 'null')
-so <- sleuth_lrt(so, 'null', 'full')
-sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
-sleuth_table_lrt[1:5,]
-sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
-dim(sleuth_significant_lrt)
-head(sleuth_significant_lrt, 3)
-
-#counts for top significant genes in Wald Test
-selected_gene <- sleuth_significant_wt$target_id[1]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-selected_gene <- sleuth_significant_wt$target_id[2]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-selected_gene <- sleuth_significant_wt$target_id[3]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-#saving the gene differential expression results 
-
-#checking the table has no duplicate entries
-length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
-
-write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_Glial\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
-write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_Glial\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
-
-##### TRANSCRIPT-LEVEL ANALYSIS #####
-sleuth_table_txn <- sleuth_results(so, test = 'tissue_stateNon_glial',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
-dim(sleuth_table_txn)
-sleuth_table_txn[1:5,]
-
-#significant transcripts:
-sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
-dim(sleuth_significant_txn) 
-head(sleuth_significant_txn, 3)
-
-#saving the results
-write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_Glial\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id") 
-#determining up and down regulated transcripts and genes
-sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
-dim(sleuth_significant_txn.up)
-head(sleuth_significant_txn.up, 4)
-
-#how many genes are upregulated? 
-length(unique(sleuth_significant_txn.up$ens_gene))
-
-#saving the gene ids instead of transcript ones
-write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_Glial\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
-sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
-head(sleuth_significant_txn.down, 4)
-
-#how many genes are downpregulated? 
-length(unique(sleuth_significant_txn.down$ens_gene))
-write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_Glial\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
 
 ####### SUMMARY OF NUMBERS ##########
 #all transcripts included initially in the analysis: 
