@@ -11,6 +11,7 @@ library('sleuth')
 library('biomaRt')
 
 ##Setting up variables containing paths and directories for which the Kallisto results are found
+##Insert the file path to where the Kallisto results have been stored.
 sample_id <- dir(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\"))
 sample_id
 
@@ -18,6 +19,7 @@ kal_dirs <- file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\",
 kal_dirs
 
 ##Reading in the meta data to a variable
+##Insert the file path to where the metadata file of the sample runs is stored.
 s2c <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\metadata\\SraRunTable.txt"), header = TRUE, stringsAsFactors=FALSE, sep = ",")
 s2c <- dplyr::select(s2c, sample = Run, condition = Reactivetissue)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
@@ -144,11 +146,12 @@ plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$targe
 selected_gene <- sleuth_significant_wt$target_id[3]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
 
-#saving the gene differential expression results 
+##saving the gene differential expression results 
 
-#checking the table has no duplicate entries
+##checking the table has no duplicate entries
 length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
 
+##writing the significant gene ids and names to a given file path of choice.
 write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
 write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
 
@@ -157,28 +160,32 @@ sleuth_table_txn <- sleuth_results(so, test = 'conditionGlial',test_type = 'wt',
 dim(sleuth_table_txn)
 sleuth_table_txn[1:5,]
 
-#significant transcripts:
+##significant transcripts:
 sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
 dim(sleuth_significant_txn) 
 head(sleuth_significant_txn, 3)
 
-#saving the results
+##writing the significant transcript ids to a given file path of choice.
 write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id") 
-#determining up and down regulated transcripts and genes
+
+##determining up and down regulated transcripts and genes
 sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
 dim(sleuth_significant_txn.up)
 head(sleuth_significant_txn.up, 4)
 
-#how many genes are upregulated? 
+##how many genes are upregulated? 
 length(unique(sleuth_significant_txn.up$ens_gene))
 
-#saving the gene ids instead of transcript ones
+##saving the uniquely up regulated gene ids to a given file path of choice.
 write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+
 sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
 head(sleuth_significant_txn.down, 4)
 
 #how many genes are downpregulated? 
 length(unique(sleuth_significant_txn.down$ens_gene))
+
+##saving the uniquely down regulated gene ids to a given file path of choice
 write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
 
 ####### SUMMARY OF NUMBERS ##########
