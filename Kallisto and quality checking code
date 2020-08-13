@@ -30,6 +30,22 @@ do
         mv ${sample}_2NEW.fastq.gz ${sample}_2.fastq.gz
 done
 
+#########Doing quality checking of the reads after trimming###########
+
+echo $"Now Running FastQC for the Samples" | sed $'s/Now Running FastQC for the Samples/\e[32m&\e[0m/';
+
+for sample in `cat list.txt`
+do
+
+    fastqc ${sample}_1.fastq.gz ${sample}_2.fastq.gz
+
+done
+
+echo $"Now Running MultiQC for the Samples" | sed $'s/Now Running MultiQC for the Samples/\e[36m&\e[0m/';
+
+multiqc .
+
+
 ##########Carryingout differential expression analysis using alignment free approach Kallisto##############
 
 
