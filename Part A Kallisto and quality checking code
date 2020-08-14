@@ -2,6 +2,11 @@
 
 #########Doing quality checking of the reads###########
 
+##The line of the code below is only specific to the server used in my analysis and is otherwise non essential when you are certain of the absolute path in which the algorithm is located.##
+module load fastqc
+
+fastqc --version
+
 echo $"Now Running FastQC for the Samples" | sed $'s/Now Running FastQC for the Samples/\e[32m&\e[0m/';
 
 for sample in `cat list.txt`
@@ -11,6 +16,12 @@ do
 
 done
 
+## The two lines of code below are only specific to the server used in my analysis and are otherwise non essential when you are certain of the absolute path in which the algorithm is located.##
+module use -s /s/mm/modules
+module load python/v2
+
+multiqc --version
+
 echo $"Now Running MultiQC for the Samples" | sed $'s/Now Running MultiQC for the Samples/\e[36m&\e[0m/';
 
 multiqc .
@@ -19,6 +30,7 @@ multiqc .
 
 echo $"Now carrying out quality trimming of the reads." | sed $'s/Now carrying out quality trimming of the reads./\e[36m&\e[0m/';
 
+/s/software/anaconda/python3/bin/cutadapt --version
 
 for sample in `cat list.txt`
 do
