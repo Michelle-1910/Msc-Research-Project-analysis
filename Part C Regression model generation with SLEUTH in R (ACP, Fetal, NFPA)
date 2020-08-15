@@ -106,7 +106,7 @@ check_target_mapping <- function(t2g, target_mapping, gene_mode) {
 ##Differential expression
 #Preparing the analysis object
 design <- ~condition 
-so <- sleuth_prep(s2c, full_model = design, read_bootstrap_tpm = TRUE, extra_bootstrap_summary=TRUE, target_mapping = t2g, transform_fun_counts = function(x) log2(x + 0.5),  aggregation_column = 'ens_gene') 
+so <- sleuth_prep(s2c, full_model = design, num_cores = 2, read_bootstrap_tpm = TRUE, extra_bootstrap_summary=TRUE, target_mapping = t2g, transform_fun_counts = function(x) log2(x + 0.5),  aggregation_column = 'ens_gene') 
 
 #The analysis
 so <- sleuth_fit(so, design, 'full')
