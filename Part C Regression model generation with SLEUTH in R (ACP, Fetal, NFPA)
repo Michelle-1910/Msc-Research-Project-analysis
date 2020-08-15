@@ -171,8 +171,10 @@ dim(sleuth_significant_txn)
 head(sleuth_significant_txn, 3)
 
 #saving the results
-write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id") 
+write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
+
 #determining up and down regulated transcripts and genes
+#up regulated genes
 sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
 dim(sleuth_significant_txn.up)
 head(sleuth_significant_txn.up, 4)
@@ -180,14 +182,18 @@ head(sleuth_significant_txn.up, 4)
 #how many genes are upregulated? 
 length(unique(sleuth_significant_txn.up$ens_gene))
 
-#saving the gene ids instead of transcript ones
-write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+#saving the results
+write.table(unique(sleuth_significant_txn.up), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
+#down regulated genes
 sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
 head(sleuth_significant_txn.down, 4)
 
 #how many genes are downpregulated? 
 length(unique(sleuth_significant_txn.down$ens_gene))
-write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+
+#saving the results
+write.table(unique(sleuth_significant_txn.down), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 ####### SUMMARY OF NUMBERS ##########
 #all transcripts included initially in the analysis: 
@@ -222,6 +228,22 @@ sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
 dim(sleuth_significant_wt)
 head(sleuth_significant_wt, 3)
 
+#counts for top significant genes in Wald Test
+selected_gene <- sleuth_significant_wt$target_id[1]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[1]
+selected_gene
+
+selected_gene <- sleuth_significant_wt$target_id[2]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[2]
+selected_gene
+
+selected_gene <- sleuth_significant_wt$target_id[3]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[3]
+selected_gene
+
 #LRT test
 so <- sleuth_fit(so, ~1, 'null')
 so <- sleuth_lrt(so, 'null', 'full')
@@ -231,23 +253,12 @@ sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
 dim(sleuth_significant_lrt)
 head(sleuth_significant_lrt, 3)
 
-#counts for top significant genes in Wald Test
-selected_gene <- sleuth_significant_wt$target_id[1]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-selected_gene <- sleuth_significant_wt$target_id[2]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-selected_gene <- sleuth_significant_wt$target_id[3]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-#saving the gene differential expression results 
-
 #checking the table has no duplicate entries
 length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
 
-write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
-write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
+#saving the gene differential expression results from the wald test
+write.table(sleuth_significant_wt, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
 
 ##### TRANSCRIPT-LEVEL ANALYSIS #####
 sleuth_table_txn <- sleuth_results(so, test = 'conditionNFPA',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
@@ -260,8 +271,10 @@ dim(sleuth_significant_txn)
 head(sleuth_significant_txn, 3)
 
 #saving the results
-write.table(sleuth_significant_txn$target_id, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id") 
+write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
+
 #determining up and down regulated transcripts and genes
+#up regulated genes
 sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
 dim(sleuth_significant_txn.up)
 head(sleuth_significant_txn.up, 4)
@@ -269,14 +282,18 @@ head(sleuth_significant_txn.up, 4)
 #how many genes are upregulated? 
 length(unique(sleuth_significant_txn.up$ens_gene))
 
-#saving the gene ids instead of transcript ones
-write.table(unique(sleuth_significant_txn.up$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+#saving the results
+write.table(unique(sleuth_significant_txn.up), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
+#down regulated genes
 sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
 head(sleuth_significant_txn.down, 4)
 
 #how many genes are downpregulated? 
 length(unique(sleuth_significant_txn.down$ens_gene))
-write.table(unique(sleuth_significant_txn.down$ens_gene), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = "#ens_gene")
+
+#saving the results
+write.table(unique(sleuth_significant_txn.down), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 ####### SUMMARY OF NUMBERS ##########
 #all transcripts included initially in the analysis: 
