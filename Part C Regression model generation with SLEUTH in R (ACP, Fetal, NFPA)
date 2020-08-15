@@ -257,7 +257,7 @@ head(sleuth_significant_lrt, 3)
 length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
 
 #saving the gene differential expression results from the wald test
-write.table(sleuth_significant_wt, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+write.table(sleuth_significant_wt, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 
 ##### TRANSCRIPT-LEVEL ANALYSIS #####
