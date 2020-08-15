@@ -21,7 +21,7 @@ kal_dirs
 ##Reading in the meta data to a variable
 ##Insert the file path to where the metadata file of the sample runs is stored.
 s2c <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\metadata\\SraRunTable.txt"), header = TRUE, stringsAsFactors=FALSE, sep = ",")
-s2c <- dplyr::select(s2c, sample = Run, condition = Reactivetissue)
+s2c <- dplyr::select(s2c, sample = Run, condition = Type, Glial_content)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
 s2c
 
@@ -105,15 +105,15 @@ check_target_mapping <- function(t2g, target_mapping, gene_mode) {
 
 ##Differential expression
 #Preparing the analysis object
-design <- ~condition 
-so <- sleuth_prep(s2c, full_model = design, read_bootstrap_tpm = TRUE, extra_bootstrap_summary=TRUE, target_mapping = t2g, transform_fun_counts = function(x) log2(x + 0.5),  aggregation_column = 'ens_gene') 
+design <- ~condition + Glial_content
+so <- sleuth_prep(s2c, full_model = design, num_cores = 2, read_bootstrap_tpm = TRUE, extra_bootstrap_summary=TRUE, target_mapping = t2g, transform_fun_counts = function(x) log2(x + 0.5),  aggregation_column = 'ens_gene') 
 
 #The analysis
 so <- sleuth_fit(so, design, 'full')
 
 models(so)
 
-##Handling the GlialvsNon-glialvsFetalvsNFPA##
+##Handling the ACP(GlialvsNon-glial)vsFetalvsNFPA##
 
 #####GENE-LEVEL ANALYSIS#####
 #do a Wald test 
@@ -122,10 +122,27 @@ so <- sleuth_wt(so, which_beta='conditionGlial', which_model='full')
 
 sleuth_table_wt <- sleuth_results(so, test= 'conditionGlial', test_type = 'wt',which_model = 'full',show_all = TRUE)
 dim(sleuth_table_wt)
+
 #significant genes: 
 sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
 dim(sleuth_significant_wt)
 head(sleuth_significant_wt, 3)
+
+#counts for top significant genes in Wald Test
+selected_gene <- sleuth_significant_wt$target_id[1]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[1]
+selected_gene
+
+selected_gene <- sleuth_significant_wt$target_id[2]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[2]
+selected_gene
+
+selected_gene <- sleuth_significant_wt$target_id[3]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[3]
+selected_gene
 
 #LRT test
 so <- sleuth_fit(so, ~1, 'null')
@@ -135,16 +152,6 @@ sleuth_table_lrt[1:5,]
 sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
 dim(sleuth_significant_lrt)
 head(sleuth_significant_lrt, 3)
-
-#counts for top significant genes in Wald Test
-selected_gene <- sleuth_significant_wt$target_id[1]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-selected_gene <- sleuth_significant_wt$target_id[2]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
-
-selected_gene <- sleuth_significant_wt$target_id[3]
-plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
 
 ##saving the gene differential expression results 
 
