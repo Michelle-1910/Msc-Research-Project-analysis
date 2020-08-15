@@ -152,13 +152,13 @@ sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
 dim(sleuth_significant_lrt)
 head(sleuth_significant_lrt, 3)
 
-#saving the gene differential expression results 
+ 
 
 #checking the table has no duplicate entries
 length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
 
-write.table(sleuth_significant_wt$target_id, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_NEW.txt", quote=FALSE, row.names = FALSE, col.names = "#target_id")
-write.table(sleuth_significant_wt$ext_gene, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_NAMES.txt", quote=FALSE, row.names = FALSE, col.names = "#ext_gene")
+#saving the gene differential expression results from the wald test
+write.table(sleuth_significant_wt, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 ##### TRANSCRIPT-LEVEL ANALYSIS #####
 sleuth_table_txn <- sleuth_results(so, test = 'conditionFetal',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
