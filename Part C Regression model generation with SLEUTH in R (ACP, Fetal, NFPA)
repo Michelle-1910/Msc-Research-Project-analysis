@@ -130,12 +130,18 @@ head(sleuth_significant_wt, 3)
 #counts for top significant genes in Wald Test
 selected_gene <- sleuth_significant_wt$target_id[1]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[1]
+selected_gene
 
 selected_gene <- sleuth_significant_wt$target_id[2]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[2]
+selected_gene
 
 selected_gene <- sleuth_significant_wt$target_id[3]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[3]
+selected_gene
 
 #LRT test
 so <- sleuth_fit(so, ~1, 'null')
