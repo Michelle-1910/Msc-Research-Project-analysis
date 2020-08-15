@@ -127,15 +127,6 @@ sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
 dim(sleuth_significant_wt)
 head(sleuth_significant_wt, 3)
 
-#LRT test
-so <- sleuth_fit(so, ~1, 'null')
-so <- sleuth_lrt(so, 'null', 'full')
-sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
-sleuth_table_lrt[1:5,]
-sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
-dim(sleuth_significant_lrt)
-head(sleuth_significant_lrt, 3)
-
 #counts for top significant genes in Wald Test
 selected_gene <- sleuth_significant_wt$target_id[1]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
@@ -145,6 +136,15 @@ plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$targe
 
 selected_gene <- sleuth_significant_wt$target_id[3]
 plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+
+#LRT test
+so <- sleuth_fit(so, ~1, 'null')
+so <- sleuth_lrt(so, 'null', 'full')
+sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
+sleuth_table_lrt[1:5,]
+sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
+dim(sleuth_significant_lrt)
+head(sleuth_significant_lrt, 3)
 
 #saving the gene differential expression results 
 
