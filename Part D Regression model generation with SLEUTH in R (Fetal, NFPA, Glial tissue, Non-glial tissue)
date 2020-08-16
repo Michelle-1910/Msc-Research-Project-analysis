@@ -113,7 +113,7 @@ so <- sleuth_fit(so, design, 'full')
 
 models(so)
 
-##Handling the ACP(GlialvsNon-glial)vsFetalvsNFPA##
+##Handling the ACP(Glial)vsFetalvsNFPA##
 
 #####GENE-LEVEL ANALYSIS#####
 #do a Wald test 
@@ -158,7 +158,7 @@ head(sleuth_significant_lrt, 3)
 length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
 
 ##saving the gene differential expression results from the wald test
-write.table(sleuth_significant_wt, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+write.table(sleuth_significant_wt, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 ##### TRANSCRIPT-LEVEL ANALYSIS #####
 sleuth_table_txn <- sleuth_results(so, test = 'conditionGlial',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
@@ -171,7 +171,7 @@ dim(sleuth_significant_txn)
 head(sleuth_significant_txn, 3)
 
 ##saving the results
-write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
+write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
 
 ##determining up and down regulated transcripts and genes
 #up regulated genes
@@ -183,7 +183,7 @@ head(sleuth_significant_txn.up, 4)
 length(unique(sleuth_significant_txn.up$ens_gene))
 
 ##saving the results
-write.table(unique(sleuth_significant_txn.up), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+write.table(unique(sleuth_significant_txn.up), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 #down regulated genes
 sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
@@ -193,7 +193,7 @@ head(sleuth_significant_txn.down, 4)
 length(unique(sleuth_significant_txn.down$ens_gene))
 
 ##saving the results
-write.table(unique(sleuth_significant_txn.down), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+write.table(unique(sleuth_significant_txn.down), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 ####### SUMMARY OF NUMBERS ##########
 #all transcripts included initially in the analysis: 
@@ -213,6 +213,109 @@ length(sleuth_significant_txn$target_id)
 
 #how many genes correspond to the above transcripts?
 length(unique(sleuth_significant_txn$ens_gene))
+
+##Handling the ACP(Non-glial)vsFetalvsNFPA##
+
+#####GENE-LEVEL ANALYSIS#####
+
+#do a Wald test 
+so <- sleuth_wt(so, which_beta='conditionNon_glial', which_model='full')
+
+
+sleuth_table_wt <- sleuth_results(so, test= 'conditionNon_glial', test_type = 'wt',which_model = 'full',show_all = TRUE)
+dim(sleuth_table_wt)
+
+#significant genes: 
+sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
+dim(sleuth_significant_wt)
+head(sleuth_significant_wt, 3)
+
+#counts for top significant genes in Wald Test
+selected_gene <- sleuth_significant_wt$target_id[1]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[1]
+selected_gene
+
+selected_gene <- sleuth_significant_wt$target_id[2]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[2]
+selected_gene
+
+selected_gene <- sleuth_significant_wt$target_id[3]
+plot_bootstrap(so, target_id=(dplyr::filter(t2g, ens_gene==selected_gene))$target_id[1], units = "est_counts", color_by = "condition")
+selected_gene <- sleuth_significant_wt$ext_gene[3]
+selected_gene
+
+#LRT test
+so <- sleuth_fit(so, ~1, 'null')
+so <- sleuth_lrt(so, 'null', 'full')
+sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
+sleuth_table_lrt[1:5,]
+sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
+dim(sleuth_significant_lrt)
+head(sleuth_significant_lrt, 3)
+
+
+##checking the table has no duplicate entries
+length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
+
+##saving the gene differential expression results from the wald test
+write.table(sleuth_significant_wt, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
+##### TRANSCRIPT-LEVEL ANALYSIS #####
+sleuth_table_txn <- sleuth_results(so, test = 'conditionNon_glial',test_type = 'wt',which_model = 'full',show_all = TRUE,pval_aggregate = FALSE)
+dim(sleuth_table_txn)
+sleuth_table_txn[1:5,]
+
+##significant transcripts:
+sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
+dim(sleuth_significant_txn) 
+head(sleuth_significant_txn, 3)
+
+##saving the results
+write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
+
+##determining up and down regulated transcripts and genes
+#up regulated genes
+sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
+dim(sleuth_significant_txn.up)
+head(sleuth_significant_txn.up, 4)
+
+##how many genes are upregulated? 
+length(unique(sleuth_significant_txn.up$ens_gene))
+
+##saving the results
+write.table(unique(sleuth_significant_txn.up), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
+#down regulated genes
+sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
+head(sleuth_significant_txn.down, 4)
+
+#how many genes are downpregulated? 
+length(unique(sleuth_significant_txn.down$ens_gene))
+
+##saving the results
+write.table(unique(sleuth_significant_txn.down), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_down.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
+####### SUMMARY OF NUMBERS ##########
+#all transcripts included initially in the analysis: 
+length(sleuth_table_txn$target_id)
+
+#all transcripts included initially in the analysis:
+length(sleuth_table_wt$target_id)
+
+#the number of genes in the transcript table
+length(unique(sleuth_table_txn$ens_gene))
+
+#significantly DE genes (aggregated) in the gene results table at q<0.05 
+length(sleuth_significant_wt$target_id)
+
+#significantly DE transcripts in the transcript results table
+length(sleuth_significant_txn$target_id) 
+
+#how many genes correspond to the above transcripts?
+length(unique(sleuth_significant_txn$ens_gene))
+
 
 ### Exploratory Data Analysis###
 
