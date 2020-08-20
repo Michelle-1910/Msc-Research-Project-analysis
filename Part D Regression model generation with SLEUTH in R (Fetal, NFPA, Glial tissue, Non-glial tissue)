@@ -9,6 +9,10 @@ BiocManager::install("pachterlab/sleuth")
 BiocManager::install(c("biomaRt"))
 library('sleuth')
 library('biomaRt')
+library('tximport')
+library('dplyr')
+library('ggplot2')
+library('DESeq2')
 
 ##Setting up variables containing paths and directories for which the Kallisto results are found
 ##Insert the file path to where the Kallisto results have been stored.
@@ -319,39 +323,104 @@ length(unique(sleuth_significant_txn$ens_gene))
 
 ### Exploratory Data Analysis###
 
-plot_pca(so,color_by = 'condition',text_labels = FALSE)
-plot_pca(so,color_by = 'condition',text_labels = TRUE)
+samples <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\metadata\\SraRunTable.txt"), header = TRUE, stringsAsFactors=FALSE, sep = ",")
+samples$Run
 
-plot_pca(so,color_by = 'condition',text_labels = TRUE, units="tpm")
-plot_pca(so,color_by = 'condition',text_labels = FALSE, units="tpm")
+sample_id <- dir(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\"))
+sample_id
 
-plot_pca(so,pc_x=2,pc_y=3,color_by = 'condition',text_labels = FALSE)
-plot_pca(so,pc_x=2,pc_y=3,color_by = 'condition',text_labels = TRUE)
+kal_files <- file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\", sample_id, "abundance.h5")
+kal_files
 
-plot_pca(so,pc_x=2,pc_y=8,color_by = 'condition',text_labels = FALSE)
-plot_pca(so,pc_x=2,pc_y=8,color_by = 'condition',text_labels = TRUE)
+metadata <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\metadata\\SraRunTable.txt"), header = TRUE, stringsAsFactors=FALSE, sep = ",")
+metadata <- dplyr::mutate(metadata, condition = Glial_content)
+metadata
 
-#how much of the variance is accounted for by each PC?
-plot_pc_variance(obj = so, units = "est_counts")
-plot_pc_variance(obj = so, units = "tpm")
+##Associating transcripts to genes
+mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",dataset = "hsapiens_gene_ensembl",host = "dec2015.archive.ensembl.org")
 
+t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "transcript_version", "ensembl_gene_id", "external_gene_name", "description","transcript_biotype"),mart = mart)
+head(t2g)
 
-plot_loadings(so, pc_input=1)
-plot_loadings(so, pc_input=2)
-plot_loadings(so, pc_input=3)
-plot_loadings(so, pc_input=8) 
+t2g$ensembl_transcript_id_version = paste(t2g$ensembl_transcript_id, t2g$transcript_version, sep=".")
+t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id_version,ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
+t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
+head(t2g)
 
-plot_group_density(so,
-                   use_filtered = FALSE,
-                   units = "est_counts",
-                   trans = "log",
-                   grouping = "condition")
-plot_group_density(so,
-                   use_filtered = TRUE,
-                   units = "est_counts",
-                   trans = "log",
-                   grouping = "condition")
+#increasing the memory allocated for tximport in rstudio
+memory.limit(size = NA)
 
+memory.size()
 
-library(ggplot2)
-plot_sample_heatmap(so)
+memory.limit(size = 7000)
+
+memory.limit(size = NA)
+
+txi.kallisto <- tximport(kal_files, type="kallisto", tx2gene=t2g, countsFromAbundance = "lengthScaledTPM")
+names(txi.kallisto)
+head(txi.kallisto$counts)
+
+# Check that the row names of the metadata equal the column names of the **raw counts** data
+all(colnames(txi.kallisto$counts) == rownames(metadata))
+
+# Create DESeq2Dataset object
+dds <- DESeqDataSetFromTximport(txi.kallisto, colData = metadata, design = ~condition)
+
+# Transform counts for data visualization
+rld <- rlog(dds, blind=TRUE)
+
+# Plot PCA 
+plotPCA(rld, intgroup="condition")
+
+## Plotting the significantly differentially expressed genes ###
+
+### Plotting the top 20 significantly differentially expressed genes ###
+
+###Plotting for the ACP(Glial)vscontrols###
+
+sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+
+top_sig_genes <- sig_genes[order(sig_genes$qval),]
+
+top20_sig_genes <- top_sig_genes[1:20,]
+
+top20_sig_genes <- dplyr::select(top20_sig_genes, gene_id = ext_gene, q_value = qval)
+
+top20_sig_genes
+
+## plot using ggplot2
+
+ggplot(data = top20_sig_genes) +
+  geom_point(mapping = aes(x = gene_id, y = q_value), color = "brown", position=position_jitter(w=0.1,h=0)) +
+  scale_y_log10() +
+  xlab("gene_id") +
+  ylab("q_value") +
+  ggtitle("Top 20 Significant Differentially Expressed Genes") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title=element_text(hjust=0.5))
+  
+###Plotting for the ACP(Glial)vscontrols###
+
+sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+
+top_sig_genes <- sig_genes[order(sig_genes$qval),]
+
+top20_sig_genes <- top_sig_genes[1:20,]
+
+top20_sig_genes <- dplyr::select(top20_sig_genes, gene_id = ext_gene, q_value = qval)
+
+top20_sig_genes
+
+## plot using ggplot2
+
+ggplot(data = top20_sig_genes) +
+  geom_point(mapping = aes(x = gene_id, y = q_value), color = "orange", position=position_jitter(w=0.1,h=0)) +
+  scale_y_log10() +
+  xlab("gene_id") +
+  ylab("q_value") +
+  ggtitle("Top 20 Significant Differentially Expressed Genes") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title=element_text(hjust=0.5))
+  
