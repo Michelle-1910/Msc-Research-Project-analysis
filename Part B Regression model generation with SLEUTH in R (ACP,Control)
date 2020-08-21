@@ -19,7 +19,7 @@ memory.limit(size = NA)
 
 memory.size()
 
-memory.limit(size = 10000)
+memory.limit(size = 9500)
 
 memory.limit(size = NA)
 
@@ -141,6 +141,7 @@ head(sleuth_significant_wt_na, 3)
 
 #omitting the NA values
 sleuth_significant_wt <- na.omit(sleuth_significant_wt_na)
+dim(sleuth_significant_wt)
 
 #counts for top significant genes in Wald Test
 selected_gene <- sleuth_significant_wt$target_id[1]
@@ -163,9 +164,13 @@ so <- sleuth_fit(so, ~1, 'null')
 so <- sleuth_lrt(so, 'null', 'full')
 sleuth_table_lrt <- sleuth_results(so, test='null:full', 'lrt')
 sleuth_table_lrt[1:5,]
-sleuth_significant_lrt <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
+sleuth_significant_lrt_na <- dplyr::filter(sleuth_table_lrt, qval <= 0.05)
+dim(sleuth_significant_lrt_na)
+head(sleuth_significant_lrt_na, 3) 
+
+#omitting the NA values
+sleuth_significant_lrt <- na.omit(sleuth_significant_lrt_na)
 dim(sleuth_significant_lrt)
-head(sleuth_significant_lrt, 3) 
 
 #checking the table has no duplicate entries
 length(unique(sleuth_table_wt$target_id)) == length(sleuth_table_wt$target_id)
@@ -185,14 +190,20 @@ head(sleuth_significant_txn_na, 3)
 
 #omitting the NA values
 sleuth_significant_txn <- na.omit(sleuth_significant_txn_na)
+dim(sleuth_significant_txn)
 
 #saving the results
 write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_2\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 #determining up and down regulated transcripts and genes
 #up regulated genes
-sleuth_significant_txn.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
+sleuth_significant_txn_na.up <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b>0))  
+dim(sleuth_significant_txn_na.up)
+
+#omitting the NA values
+sleuth_significant_txn.up <- na.omit(sleuth_significant_txn_na.up)
 dim(sleuth_significant_txn.up)
+
 head(sleuth_significant_txn.up, 4)
 
 #how many genes are upregulated? 
@@ -202,7 +213,12 @@ length(unique(sleuth_significant_txn.up$ens_gene))
 write.table(unique(sleuth_significant_txn.up), file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_2\\sleuth_significant_q005_up.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
 
 #down regulated genes
-sleuth_significant_txn.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0)) 
+sleuth_significant_txn_na.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0))
+
+#omitting the NA values
+sleuth_significant_txn.down <- na.omit(sleuth_significant_txn_na.down)
+dim(sleuth_significant_txn.down)
+
 head(sleuth_significant_txn.down, 4)
 
 #how many genes are downpregulated? 
@@ -270,7 +286,7 @@ dds <- DESeqDataSetFromTximport(txi.kallisto, colData = metadata, design = ~cond
 # Transform counts for data visualization
 rld <- rlog(dds, blind=TRUE)
 
-# Plot PCA 
+#Plot PCA 
 plotPCA(rld, intgroup="condition")
 
 ### Plotting the significantly differentially expressed genes ###
@@ -345,6 +361,4 @@ ggplot(data = top20_downsig_genes) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
-
-
 
