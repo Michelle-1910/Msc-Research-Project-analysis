@@ -290,4 +290,28 @@ ggplot(data = top20_sig_genes) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
+### Plotting the top 20 significantly upregulated genes ###
+
+sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_2\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+
+top_upsig_genes <- sig_genes[order(sig_genes$qval),]
+
+top20_upsig_genes <- top_upsig_genes[1:20,]
+
+top20_upsig_genes <- dplyr::select(top20_upsig_genes, gene_id = ext_gene, q_value = qval)
+
+top20_upsig_genes
+
+## plot using ggplot2
+
+ggplot(data = top20_upsig_genes) +
+  geom_point(mapping = aes(x = gene_id, y = q_value), color = "green", position=position_jitter(w=0.1,h=0)) +
+  scale_y_log10() +
+  xlab("gene_id") +
+  ylab("q_value") +
+  ggtitle("Top 20 Significantly Upregulated Genes") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title=element_text(hjust=0.5))
+
 
