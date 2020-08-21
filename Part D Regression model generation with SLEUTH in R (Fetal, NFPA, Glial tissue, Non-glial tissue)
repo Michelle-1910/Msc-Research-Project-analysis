@@ -128,9 +128,12 @@ sleuth_table_wt <- sleuth_results(so, test= 'conditionGlial', test_type = 'wt',w
 dim(sleuth_table_wt)
 
 #significant genes: 
-sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
-dim(sleuth_significant_wt)
-head(sleuth_significant_wt, 3)
+sleuth_significant_wt_na <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
+dim(sleuth_significant_wt_na)
+head(sleuth_significant_wt_na, 3)
+
+#omitting the NA values
+sleuth_significant_wt <- na.omit(sleuth_significant_wt_na)
 
 #counts for top significant genes in Wald Test
 selected_gene <- sleuth_significant_wt$target_id[1]
@@ -169,10 +172,13 @@ sleuth_table_txn <- sleuth_results(so, test = 'conditionGlial',test_type = 'wt',
 dim(sleuth_table_txn)
 sleuth_table_txn[1:5,]
 
-##significant transcripts:
-sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
-dim(sleuth_significant_txn) 
-head(sleuth_significant_txn, 3)
+#significant transcripts:
+sleuth_significant_txn_na <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
+dim(sleuth_significant_txn_na) 
+head(sleuth_significant_txn_na, 3)
+
+#omitting the NA values
+sleuth_significant_txn <- na.omit(sleuth_significant_txn_na)
 
 ##saving the results
 write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
@@ -230,9 +236,12 @@ sleuth_table_wt <- sleuth_results(so, test= 'conditionNon_glial', test_type = 'w
 dim(sleuth_table_wt)
 
 #significant genes: 
-sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
-dim(sleuth_significant_wt)
-head(sleuth_significant_wt, 3)
+sleuth_significant_wt_na <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
+dim(sleuth_significant_wt_na)
+head(sleuth_significant_wt_na, 3)
+
+#omitting the NA values
+sleuth_significant_wt <- na.omit(sleuth_significant_wt_na)
 
 #counts for top significant genes in Wald Test
 selected_gene <- sleuth_significant_wt$target_id[1]
@@ -271,10 +280,13 @@ sleuth_table_txn <- sleuth_results(so, test = 'conditionNon_glial',test_type = '
 dim(sleuth_table_txn)
 sleuth_table_txn[1:5,]
 
-##significant transcripts:
-sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
-dim(sleuth_significant_txn) 
-head(sleuth_significant_txn, 3)
+#significant transcripts:
+sleuth_significant_txn_na <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
+dim(sleuth_significant_txn_na) 
+head(sleuth_significant_txn_na, 3)
+
+#omitting the NA values
+sleuth_significant_txn <- na.omit(sleuth_significant_txn_na)
 
 ##saving the results
 write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
