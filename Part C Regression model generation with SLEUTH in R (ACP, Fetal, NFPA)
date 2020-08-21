@@ -473,3 +473,53 @@ ggplot(data = top20_upsig_genes) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
+### Plotting the top 20 significantly downregulated genes ###
+
+###Plotting for the FetalvsACP###
+
+sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+
+top_downsig_genes <- sig_genes[order(sig_genes$qval),]
+
+top20_downsig_genes <- top_downsig_genes[1:20,]
+
+top20_downsig_genes <- dplyr::select(top20_downsig_genes, gene_id = ext_gene, q_value = qval)
+
+top20_downsig_genes
+
+## plot using ggplot2
+
+ggplot(data = top20_downsig_genes) +
+  geom_point(mapping = aes(x = gene_id, y = q_value), color = "purple", position=position_jitter(w=0.1,h=0)) +
+  scale_y_log10() +
+  xlab("gene_id") +
+  ylab("q_value") +
+  ggtitle("Top 20 Significantly Downregulated Genes") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title=element_text(hjust=0.5))
+
+###Plotting for the NFPAvsACP###
+
+sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+
+top_downsig_genes <- sig_genes[order(sig_genes$qval),]
+
+top20_downsig_genes <- top_downsig_genes[1:20,]
+
+top20_downsig_genes <- dplyr::select(top20_downsig_genes, gene_id = ext_gene, q_value = qval)
+
+top20_downsig_genes
+
+## plot using ggplot2
+
+ggplot(data = top20_downsig_genes) +
+  geom_point(mapping = aes(x = gene_id, y = q_value), color = "green", position=position_jitter(w=0.1,h=0)) +
+  scale_y_log10() +
+  xlab("gene_id") +
+  ylab("q_value") +
+  ggtitle("Top 20 Significantly Downregulated Genes") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title=element_text(hjust=0.5))
+
