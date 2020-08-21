@@ -272,7 +272,7 @@ t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id_version,ens_gene = e
 t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
 head(t2g)
 
-
+#importing kallisto counts into tximport
 txi.kallisto <- tximport(kal_files, type="kallisto", tx2gene=t2g, countsFromAbundance = "lengthScaledTPM")
 names(txi.kallisto)
 head(txi.kallisto$counts)
