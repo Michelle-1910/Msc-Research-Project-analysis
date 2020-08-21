@@ -14,6 +14,15 @@ library('dplyr')
 library('ggplot2')
 library('DESeq2')
 
+#increasing the memory allocated for rstudio
+memory.limit(size = NA)
+
+memory.size()
+
+memory.limit(size = 10000)
+
+memory.limit(size = NA)
+
 ##Setting up variables containing paths and directories for which the Kallisto results are found
 ##Insert the file path to where the Kallisto results have been stored.
 sample_id <- dir(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\kallisto_results\\"))
