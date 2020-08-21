@@ -127,9 +127,12 @@ so <- sleuth_wt(so, which_beta='conditionFetal', which_model='full')
 sleuth_table_wt <- sleuth_results(so, test= 'conditionFetal', test_type = 'wt',which_model = 'full',show_all = TRUE)
 
 #significant genes: 
-sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
-dim(sleuth_significant_wt)
-head(sleuth_significant_wt, 3)
+sleuth_significant_wt_na <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
+dim(sleuth_significant_wt_na)
+head(sleuth_significant_wt_na, 3)
+
+#omitting the NA values
+sleuth_significant_wt <- na.omit(sleuth_significant_wt_na)
 
 #counts for top significant genes in Wald Test
 selected_gene <- sleuth_significant_wt$target_id[1]
@@ -170,9 +173,12 @@ dim(sleuth_table_txn)
 sleuth_table_txn[1:5,]
 
 #significant transcripts:
-sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
-dim(sleuth_significant_txn) 
-head(sleuth_significant_txn, 3)
+sleuth_significant_txn_na <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
+dim(sleuth_significant_txn_na) 
+head(sleuth_significant_txn_na, 3)
+
+#omitting the NA values
+sleuth_significant_txn <- na.omit(sleuth_significant_txn_na)
 
 #saving the results
 write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
@@ -228,9 +234,12 @@ so <- sleuth_wt(so, which_beta='conditionNFPA', which_model='full')
 sleuth_table_wt <- sleuth_results(so, test= 'conditionNFPA', test_type = 'wt',which_model = 'full',show_all = TRUE)
 
 #significant genes: 
-sleuth_significant_wt <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
-dim(sleuth_significant_wt)
-head(sleuth_significant_wt, 3)
+sleuth_significant_wt_na <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
+dim(sleuth_significant_wt_na)
+head(sleuth_significant_wt_na, 3)
+
+#omitting the NA values
+sleuth_significant_wt <- na.omit(sleuth_significant_wt_na)
 
 #counts for top significant genes in Wald Test
 selected_gene <- sleuth_significant_wt$target_id[1]
@@ -270,9 +279,12 @@ dim(sleuth_table_txn)
 sleuth_table_txn[1:5,]
 
 #significant transcripts:
-sleuth_significant_txn <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
-dim(sleuth_significant_txn) 
-head(sleuth_significant_txn, 3)
+sleuth_significant_txn_na <- dplyr::filter(sleuth_table_txn, qval <= 0.05)
+dim(sleuth_significant_txn_na) 
+head(sleuth_significant_txn_na, 3)
+
+#omitting the NA values
+sleuth_significant_txn <- na.omit(sleuth_significant_txn_na)
 
 #saving the results
 write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
