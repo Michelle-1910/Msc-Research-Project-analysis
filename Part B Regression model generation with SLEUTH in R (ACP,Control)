@@ -124,6 +124,7 @@ so <- sleuth_wt(so, which_beta='conditionControl', which_model='full')
 
 sleuth_table_wt <- sleuth_results(so, test= 'conditionControl', test_type = 'wt',which_model = 'full',show_all = TRUE)
 dim(sleuth_table_wt)
+
 #significant genes: 
 sleuth_significant_wt_na <- dplyr::filter(sleuth_table_wt, qval <= 0.05)
 dim(sleuth_significant_wt_na)
