@@ -216,6 +216,7 @@ write.table(unique(sleuth_significant_txn.up), file="C:\\Users\\Asus\\Documents\
 
 #down regulated genes
 sleuth_significant_txn_na.down <- dplyr::filter(sleuth_table_txn, (qval <= 0.05) & (b<0))
+dim(sleuth_significant_txn_na.down)
 
 #omitting the NA values
 sleuth_significant_txn.down <- na.omit(sleuth_significant_txn_na.down)
@@ -317,7 +318,6 @@ head(sleuth_significant_txn_na, 3)
 #omitting the NA values
 sleuth_significant_txn <- na.omit(sleuth_significant_txn_na)
 dim(sleuth_significant_txn)
-
 
 #saving the results
 write.table(sleuth_significant_txn, file="C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_TXN_q005.txt", quote=FALSE, row.names = FALSE, col.names = TRUE) 
