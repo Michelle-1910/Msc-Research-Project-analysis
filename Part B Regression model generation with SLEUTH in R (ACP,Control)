@@ -13,6 +13,9 @@ library('tximport')
 library('dplyr')
 library('ggplot2')
 library('DESeq2')
+library('goseq')
+library('clusterProfiler')
+library('org.Hs.eg.db')
 
 #increasing the memory allocated for rstudio
 memory.limit(size = NA)
@@ -245,6 +248,44 @@ length(sleuth_significant_txn$target_id)
 
 #how many genes correspond to the above transcripts?
 length(unique(sleuth_significant_txn$ens_gene))
+
+##Run GO enrichment analysis with clusterProfiler##
+
+##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
+genes <- sleuth_significant_wt$target_id
+head(genes,5)
+genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+head(genes,10)
+genes <- genes$ENTREZID
+head(genes,5)
+
+genes_all <- dplyr::filter(sleuth_table_wt, !is.na(qval))$target_id
+head(genes_all,5)
+genes_all <- bitr(genes_all, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+head(genes_all,5)
+genes_all <- genes_all$ENTREZID
+head(genes_all,5)
+
+ego <- enrichGO(gene = genes, 
+                universe = genes_all,
+                keyType = "ENTREZID",
+                OrgDb = org.Hs.eg.db, 
+                ont = "BP",
+                pAdjustMethod = "BH", 
+                qvalueCutoff = 0.05, 
+                readable = TRUE)
+
+cluster_summary <- data.frame(ego)
+
+#saving the results#
+write.csv(cluster_summary, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_2\\clusterProfiler_BP.csv")
+
+#enrichment dotplot
+enrichment_dotplot <- clusterProfiler::dotplot(ego, 
+                                               x="GeneRatio",
+                                               showCategory = 30)
+plot(enrichment_dotplot)
+
 
 ### Exploratory Data Analysis###
 
