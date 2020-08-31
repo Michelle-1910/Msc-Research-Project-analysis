@@ -249,6 +249,7 @@ length(sleuth_significant_txn$target_id)
 #how many genes correspond to the above transcripts?
 length(unique(sleuth_significant_txn$ens_gene))
 
+
 ##Run GO enrichment analysis with clusterProfiler##
 
 ##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
@@ -282,6 +283,131 @@ write.csv(cluster_summary, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_v
 
 #enrichment dotplot
 enrichment_dotplot <- clusterProfiler::dotplot(ego, 
+                                               x="GeneRatio",
+                                               showCategory = 30)
+plot(enrichment_dotplot)
+
+### GO over-representation analysis with clusterProfiler (using transcript-level sleuth results)
+
+# first, create a df without duplicate genes (first row is kept and so most important transcript should be kept in the df)
+df <- sleuth_significant_txn %>% distinct(ens_gene, .keep_all=TRUE) 
+# check it worked
+dim(df)
+length(unique(sleuth_significant_txn$ens_gene)) == dim(df)[1]
+# now re-run enrichGO using these genes instead 
+
+##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
+genes <- df$ens_gene
+head(genes,5)
+genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+head(genes,10)
+genes <- genes$ENTREZID
+head(genes,5)
+
+genes_all <- unique(dplyr::filter(sleuth_table_txn, !is.na(qval))$ens_gene)
+head(genes_all,5)
+genes_all <- bitr(genes_all, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+head(genes_all,5)
+genes_all <- genes_all$ENTREZID
+head(genes_all,5)
+
+ego.txn <- enrichGO(gene = genes, 
+                    universe = genes_all,
+                    keyType = "ENTREZID",
+                    OrgDb = org.Hs.eg.db, 
+                    ont = "BP",
+                    pAdjustMethod = "BH", 
+                    qvalueCutoff = 0.05, 
+                    readable = TRUE)
+#repeat quickly the dotplot and emapplot to compare them to the ones produced from the gene table
+#they should be very similar
+enrichment_dotplot <- clusterProfiler::dotplot(ego.txn, 
+                                               x="GeneRatio",
+                                               showCategory = 30)
+plot(enrichment_dotplot)
+
+### Plotting the top 20 significantly upregulated genes ###
+
+upsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_2\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+
+upsig_genes
+
+# first, create a df without duplicate genes (first row is kept and so most important transcript should be kept in the df)
+df <- upsig_genes %>% distinct(ens_gene, .keep_all=TRUE) 
+# check it worked
+dim(df)
+length(unique(upsig_genes$ens_gene)) == dim(df)[1]
+# now re-run enrichGO using these genes instead 
+
+##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
+genes <- df$ens_gene
+head(genes,5)
+genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+head(genes,10)
+genes <- genes$ENTREZID
+head(genes,5)
+
+genes_all <- unique(dplyr::filter(sleuth_table_txn, !is.na(qval))$ens_gene)
+head(genes_all,5)
+genes_all <- bitr(genes_all, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+head(genes_all,5)
+genes_all <- genes_all$ENTREZID
+head(genes_all,5)
+
+ego.txn <- enrichGO(gene = genes, 
+                    universe = genes_all,
+                    keyType = "ENTREZID",
+                    OrgDb = org.Hs.eg.db, 
+                    ont = "BP",
+                    pAdjustMethod = "BH", 
+                    qvalueCutoff = 0.05, 
+                    readable = TRUE)
+#repeat quickly the dotplot and emapplot to compare them to the ones produced from the gene table
+#they should be very similar
+enrichment_dotplot <- clusterProfiler::dotplot(ego.txn, 
+                                               x="GeneRatio",
+                                               showCategory = 30)
+plot(enrichment_dotplot)
+
+### Plotting the top 20 significantly downregulated genes ###
+
+downsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_2\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+
+downsig_genes
+
+# first, create a df without duplicate genes (first row is kept and so most important transcript should be kept in the df)
+df <- downsig_genes %>% distinct(ens_gene, .keep_all=TRUE) 
+# check it worked
+dim(df)
+length(unique(downsig_genes$ens_gene)) == dim(df)[1]
+# now re-run enrichGO using these genes instead 
+
+##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
+genes <- df$ens_gene
+head(genes,5)
+genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+head(genes,10)
+genes <- genes$ENTREZID
+head(genes,5)
+
+genes_all <- unique(dplyr::filter(sleuth_table_txn, !is.na(qval))$ens_gene)
+head(genes_all,5)
+genes_all <- bitr(genes_all, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+head(genes_all,5)
+genes_all <- genes_all$ENTREZID
+head(genes_all,5)
+
+ego.txn <- enrichGO(gene = genes, 
+                    universe = genes_all,
+                    keyType = "ENTREZID",
+                    OrgDb = org.Hs.eg.db, 
+                    ont = "BP",
+                    pAdjustMethod = "BH", 
+                    qvalueCutoff = 0.05, 
+                    readable = TRUE)
+#repeat quickly the dotplot and emapplot to compare them to the ones produced from the gene table
+#they should be very similar
+enrichment_dotplot <- clusterProfiler::dotplot(ego.txn, 
                                                x="GeneRatio",
                                                showCategory = 30)
 plot(enrichment_dotplot)
