@@ -329,7 +329,7 @@ enrichment_dotplot <- clusterProfiler::dotplot(ego.txn,
                                                showCategory = 30)
 plot(enrichment_dotplot)
 
-### Plotting the top 20 significantly upregulated genes ###
+### Plotting the significantly upregulated genes ###
 
 upsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
@@ -372,7 +372,7 @@ enrichment_dotplot <- clusterProfiler::dotplot(ego.txn,
                                                showCategory = 30)
 plot(enrichment_dotplot)
 
-### Plotting the top 20 significantly downregulated genes ### 
+### Plotting the  significantly downregulated genes ### 
 
 downsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_FetalvsACP\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
@@ -618,7 +618,7 @@ enrichment_dotplot <- clusterProfiler::dotplot(ego.txn,
                                                showCategory = 30)
 plot(enrichment_dotplot)
 
-### Plotting the top 20 significantly upregulated genes ###
+### Plotting the  significantly upregulated genes ###
 
 upsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
@@ -661,7 +661,7 @@ enrichment_dotplot <- clusterProfiler::dotplot(ego.txn,
                                                showCategory = 30)
 plot(enrichment_dotplot)
 
-### Plotting the top 20 significantly downregulated genes ### 
+### Plotting the significantly downregulated genes ### 
 
 downsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_3\\results_NFPAvsACP\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
