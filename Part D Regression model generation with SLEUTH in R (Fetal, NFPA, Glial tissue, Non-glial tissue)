@@ -748,28 +748,30 @@ plotPCA(rld, intgroup="condition")
 
 ## Plotting the significantly differentially expressed genes ###
 
-### Plotting the top 20 significantly differentially expressed genes ###
+### Plotting the top 10 significantly differentially expressed genes ###
 
 ###Plotting for the ACP(Glial)vscontrols###
 
 sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
-top_sig_genes <- sig_genes[order(sig_genes$qval),]
+sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
-top20_sig_genes <- top_sig_genes[1:20,]
+top_sig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
 
-top20_sig_genes <- dplyr::select(top20_sig_genes, gene_id = ext_gene, q_value = qval)
+top10_sig_genes <- top_sig_genes[1:10,]
 
-top20_sig_genes
+top10_sig_genes <- dplyr::select(top10_sig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
+
+top10_sig_genes
 
 ## plot using ggplot2
 
-ggplot(data = top20_sig_genes) +
-  geom_point(mapping = aes(x = gene_id, y = q_value), color = "brown", position=position_jitter(w=0.1,h=0)) +
+ggplot(data = top10_sig_genes) +
+  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "brown", position=position_jitter(w=0.1,h=0)) +
   scale_y_log10() +
-  xlab("gene_id") +
-  ylab("q_value") +
-  ggtitle("Top 20 Significant Differentially Expressed Genes") +
+  xlab("gene_symbol") +
+  ylab("Log2_foldchange") +
+  ggtitle("Top 10 Significant Differentially Expressed Genes (ACP(Glial)vscontrols)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
@@ -778,98 +780,107 @@ ggplot(data = top20_sig_genes) +
 
 sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
-top_sig_genes <- sig_genes[order(sig_genes$qval),]
+sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
-top20_sig_genes <- top_sig_genes[1:20,]
+top_sig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
 
-top20_sig_genes <- dplyr::select(top20_sig_genes, gene_id = ext_gene, q_value = qval)
+top10_sig_genes <- top_sig_genes[1:10,]
 
-top20_sig_genes
+top10_sig_genes <- dplyr::select(top10_sig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
+
+top10_sig_genes
 
 ## plot using ggplot2
 
-ggplot(data = top20_sig_genes) +
-  geom_point(mapping = aes(x = gene_id, y = q_value), color = "orange", position=position_jitter(w=0.1,h=0)) +
+ggplot(data = top10_sig_genes) +
+  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "orange", position=position_jitter(w=0.1,h=0)) +
   scale_y_log10() +
-  xlab("gene_id") +
-  ylab("q_value") +
-  ggtitle("Top 20 Significant Differentially Expressed Genes") +
+  xlab("gene_symbol") +
+  ylab("Log2_foldchange") +
+  ggtitle("Top 10 Significant Differentially Expressed Genes (ACP(Nonglial)vscontrols)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
-### Plotting the top 20 significantly upregulated genes ###
+### Plotting the top 10 significantly upregulated genes ###
 
 ###Plotting for the ACP(Glial)vscontrols###
 
 sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
-top_upsig_genes <- sig_genes[order(sig_genes$qval),]
+sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
-top20_upsig_genes <- top_upsig_genes[1:20,]
+top_upsig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
 
-top20_upsig_genes <- dplyr::select(top20_upsig_genes, gene_id = ext_gene, q_value = qval)
+top10_upsig_genes <- top_upsig_genes[1:10,]
 
-top20_upsig_genes
+top10_upsig_genes <- dplyr::select(top10_upsig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
+
+top10_upsig_genes
 
 ## plot using ggplot2
 
-ggplot(data = top20_upsig_genes) +
-  geom_point(mapping = aes(x = gene_id, y = q_value), color = "purple", position=position_jitter(w=0.1,h=0)) +
+ggplot(data = top10_upsig_genes) +
+  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "purple", position=position_jitter(w=0.1,h=0)) +
   scale_y_log10() +
-  xlab("gene_id") +
-  ylab("q_value") +
-  ggtitle("Top 20 Significantly Upregulated Genes") +
+  xlab("gene_symbol") +
+  ylab("Log2_foldchange") +
+  ggtitle("Top 10 Significantly Upregulated Genes (ACP(Glial)vscontrols)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
+
 
 ###Plotting for the ACP(Non_glial)vscontrols###
 
 sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
-top_upsig_genes <- sig_genes[order(sig_genes$qval),]
+sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
-top20_upsig_genes <- top_upsig_genes[1:20,]
+top_upsig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
 
-top20_upsig_genes <- dplyr::select(top20_upsig_genes, gene_id = ext_gene, q_value = qval)
+top10_upsig_genes <- top_upsig_genes[1:10,]
 
-top20_upsig_genes
+top10_upsig_genes <- dplyr::select(top10_upsig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
+
+top10_upsig_genes
 
 ## plot using ggplot2
 
-ggplot(data = top20_upsig_genes) +
-  geom_point(mapping = aes(x = gene_id, y = q_value), color = "red", position=position_jitter(w=0.1,h=0)) +
+ggplot(data = top10_upsig_genes) +
+  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "red", position=position_jitter(w=0.1,h=0)) +
   scale_y_log10() +
-  xlab("gene_id") +
-  ylab("q_value") +
-  ggtitle("Top 20 Significantly Upregulated Genes") +
+  xlab("gene_symbol") +
+  ylab("Log2_foldchange") +
+  ggtitle("Top 10 Significantly Upregulated Genes (ACP(Nonglial)vscontrols)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
-### Plotting the top 20 significantly downregulated genes ###
+### Plotting the top 10 significantly downregulated genes ###
 
 ###Plotting for the ACP(Glial)vscontrols###
 
 sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
-top_downsig_genes <- sig_genes[order(sig_genes$qval),]
+sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
-top20_downsig_genes <- top_downsig_genes[1:20,]
+top_downsig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
 
-top20_downsig_genes <- dplyr::select(top20_downsig_genes, gene_id = ext_gene, q_value = qval)
+top10_downsig_genes <- top_downsig_genes[1:10,]
 
-top20_downsig_genes
+top10_downsig_genes <- dplyr::select(top10_downsig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
+
+top10_downsig_genes
 
 ## plot using ggplot2
 
-ggplot(data = top20_downsig_genes) +
-  geom_point(mapping = aes(x = gene_id, y = q_value), color = "blue", position=position_jitter(w=0.1,h=0)) +
+ggplot(data = top10_downsig_genes) +
+  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "blue", position=position_jitter(w=0.1,h=0)) +
   scale_y_log10() +
-  xlab("gene_id") +
-  ylab("q_value") +
-  ggtitle("Top 20 Significantly Downregulated Genes") +
+  xlab("gene_symbol") +
+  ylab("Log2_foldchange") +
+  ggtitle("Top 10 Significantly Downregulated Genes (ACP(Glial)vscontrols)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
@@ -878,24 +889,27 @@ ggplot(data = top20_downsig_genes) +
 
 sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
-top_downsig_genes <- sig_genes[order(sig_genes$qval),]
+sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
-top20_downsig_genes <- top_downsig_genes[1:20,]
+top_downsig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
 
-top20_downsig_genes <- dplyr::select(top20_downsig_genes, gene_id = ext_gene, q_value = qval)
+top10_downsig_genes <- top_downsig_genes[1:10,]
 
-top20_downsig_genes
+top10_downsig_genes <- dplyr::select(top10_downsig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
+
+top10_downsig_genes
 
 ## plot using ggplot2
 
-ggplot(data = top20_downsig_genes) +
-  geom_point(mapping = aes(x = gene_id, y = q_value), color = "green", position=position_jitter(w=0.1,h=0)) +
+ggplot(data = top10_downsig_genes) +
+  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "green", position=position_jitter(w=0.1,h=0)) +
   scale_y_log10() +
-  xlab("gene_id") +
-  ylab("q_value") +
-  ggtitle("Top 20 Significantly Downregulated Genes") +
+  xlab("gene_symbol") +
+  ylab("Log2_foldchange") +
+  ggtitle("Top 10 Significantly Downregulated Genes (ACP(Glial)vscontrols)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
+
 
 
