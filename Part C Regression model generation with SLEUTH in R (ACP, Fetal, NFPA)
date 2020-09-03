@@ -13,6 +13,9 @@ library('tximport')
 library('dplyr')
 library('ggplot2')
 library('DESeq2')
+library('goseq')
+library('clusterProfiler')
+library('org.Hs.eg.db')
 
 #increasing the memory allocated for rstudio
 memory.limit(size = NA)
@@ -805,7 +808,7 @@ ggplot(data = top10_sig_genes) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
-### Plotting the top 20 significantly upregulated genes ###
+### Plotting the top 10 significantly upregulated genes ###
 
 ###Plotting for the FetalvsACP###
 
@@ -828,11 +831,10 @@ ggplot(data = top10_upsig_genes) +
   scale_y_log10() +
   xlab("gene_symbol") +
   ylab("Log2_foldchange") +
-  ggtitle("Top 20 Significantly Upregulated Genes (FetalvsACP)") +
+  ggtitle("Top 10 Significantly Upregulated Genes (FetalvsACP)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
-
 
 
 ###Plotting for the NFPAvsACP###
@@ -856,12 +858,12 @@ ggplot(data = top10_upsig_genes) +
   scale_y_log10() +
   xlab("gene_symbol") +
   ylab("Log2_foldchange") +
-  ggtitle("Top 20 Significantly Upregulated Genes (NFPAvsACP)") +
+  ggtitle("Top 10 Significantly Upregulated Genes (NFPAvsACP)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
-### Plotting the top 20 significantly downregulated genes ###
+### Plotting the top 10 significantly downregulated genes ###
 
 ###Plotting for the FetalvsACP###
 
@@ -884,7 +886,7 @@ ggplot(data = top10_downsig_genes) +
   scale_y_log10() +
   xlab("gene_symbol") +
   ylab("Log2_foldchange") +
-  ggtitle("Top 20 Significantly Downregulated Genes (FetalvsACP)") +
+  ggtitle("Top 10 Significantly Downregulated Genes (FetalvsACP)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
@@ -911,7 +913,7 @@ ggplot(data = top10_downsig_genes) +
   scale_y_log10() +
   xlab("gene_symbol") +
   ylab("Log2_foldchange") +
-  ggtitle("Top 20 Significantly Downregulated Genes (NFPAvsACP)") +
+  ggtitle("Top 10 Significantly Downregulated Genes (NFPAvsACP)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
