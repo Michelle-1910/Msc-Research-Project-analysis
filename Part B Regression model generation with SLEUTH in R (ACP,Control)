@@ -468,7 +468,7 @@ top_sig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
 
 top10_sig_genes <- top_sig_genes[1:10,]
 
-top10_sig_genes <- dplyr::select(top10_sig_genes, gene_id = ext_gene, q_value = qval, Log2_foldchange = b)
+top10_sig_genes <- dplyr::select(top10_sig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
 
 top10_sig_genes
 
@@ -495,7 +495,7 @@ top_upsig_genes <- sig_genes[order(sig_genes$qval),]
 
 top10_upsig_genes <- top_upsig_genes[1:10,]
 
-top10_upsig_genes <- dplyr::select(top10_upsig_genes, gene_id = ext_gene, q_value = qval)
+top10_upsig_genes <- dplyr::select(top10_upsig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
 
 top10_upsig_genes
 
@@ -521,7 +521,7 @@ top_downsig_genes <- sig_genes[order(sig_genes$qval),]
 
 top10_downsig_genes <- top_downsig_genes[1:10,]
 
-top10_downsig_genes <- dplyr::select(top10_downsig_genes, gene_id = ext_gene, q_value = qval)
+top10_downsig_genes <- dplyr::select(top10_downsig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
 
 top10_downsig_genes
 
