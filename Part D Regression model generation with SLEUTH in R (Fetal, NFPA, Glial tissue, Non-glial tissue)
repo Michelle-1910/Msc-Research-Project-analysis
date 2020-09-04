@@ -252,168 +252,6 @@ length(sleuth_significant_txn$target_id)
 #how many genes correspond to the above transcripts?
 length(unique(sleuth_significant_txn$ens_gene))
 
-##Run GO enrichment analysis with clusterProfiler##
-
-##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
-genes <- sleuth_significant_wt$target_id
-head(genes,5)
-genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
-head(genes,10)
-genes <- genes$ENTREZID
-head(genes,5)
-
-genes_all <- dplyr::filter(sleuth_table_wt, !is.na(qval))$target_id
-head(genes_all,5)
-genes_all <- bitr(genes_all, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
-head(genes_all,5)
-genes_all <- genes_all$ENTREZID
-head(genes_all,5)
-
-ego <- enrichGO(gene = genes, 
-                universe = genes_all,
-                keyType = "ENTREZID",
-                OrgDb = org.Hs.eg.db, 
-                ont = "BP",
-                pAdjustMethod = "BH", 
-                qvalueCutoff = 0.05, 
-                readable = TRUE)
-
-cluster_summary <- data.frame(ego)  
-
-#saving the results#
-write.csv(cluster_summary, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\clusterProfiler_BP.csv")
-
-#enrichment dotplot
-enrichment_dotplot <- clusterProfiler::dotplot(ego, 
-                                               x="GeneRatio",
-                                               showCategory = 30)
-plot(enrichment_dotplot)
-
-### GO over-representation analysis with clusterProfiler (using transcript-level sleuth results)
-
-# first, create a df without duplicate genes (first row is kept and so most important transcript should be kept in the df)
-df <- sleuth_significant_txn %>% distinct(ens_gene, .keep_all=TRUE) 
-# check it worked
-dim(df)
-length(unique(sleuth_significant_txn$ens_gene)) == dim(df)[1]
-# now re-run enrichGO using these genes instead 
-
-##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
-genes <- df$ens_gene
-head(genes,5)
-genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
-head(genes,10)
-genes <- genes$ENTREZID
-head(genes,5)
-
-genes_all <- unique(dplyr::filter(sleuth_table_txn, !is.na(qval))$ens_gene)
-head(genes_all,5)
-genes_all <- bitr(genes_all, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
-head(genes_all,5)
-genes_all <- genes_all$ENTREZID
-head(genes_all,5)
-
-ego.txn <- enrichGO(gene = genes, 
-                    universe = genes_all,
-                    keyType = "ENTREZID",
-                    OrgDb = org.Hs.eg.db, 
-                    ont = "BP",
-                    pAdjustMethod = "BH", 
-                    qvalueCutoff = 0.05, 
-                    readable = TRUE)
-#repeat quickly the dotplot and emapplot to compare them to the ones produced from the gene table
-#they should be very similar
-enrichment_dotplot <- clusterProfiler::dotplot(ego.txn, 
-                                               x="GeneRatio",
-                                               showCategory = 30)
-plot(enrichment_dotplot)
-
-### Plotting the significantly upregulated genes ###
-
-upsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
-
-upsig_genes
-
-# first, create a df without duplicate genes (first row is kept and so most important transcript should be kept in the df)
-df <- upsig_genes %>% distinct(ens_gene, .keep_all=TRUE) 
-# check it worked
-dim(df)
-length(unique(upsig_genes$ens_gene)) == dim(df)[1]
-# now re-run enrichGO using these genes instead 
-
-##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
-genes <- df$ens_gene
-head(genes,5)
-genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
-head(genes,10)
-genes <- genes$ENTREZID
-head(genes,5)
-
-genes_all <- unique(dplyr::filter(sleuth_table_txn, !is.na(qval))$ens_gene)
-head(genes_all,5)
-genes_all <- bitr(genes_all, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
-head(genes_all,5)
-genes_all <- genes_all$ENTREZID
-head(genes_all,5)
-
-ego.txn <- enrichGO(gene = genes, 
-                    universe = genes_all,
-                    keyType = "ENTREZID",
-                    OrgDb = org.Hs.eg.db, 
-                    ont = "BP",
-                    pAdjustMethod = "BH", 
-                    qvalueCutoff = 0.05, 
-                    readable = TRUE)
-#repeat quickly the dotplot and emapplot to compare them to the ones produced from the gene table
-#they should be very similar
-enrichment_dotplot <- clusterProfiler::dotplot(ego.txn, 
-                                               x="GeneRatio",
-                                               showCategory = 30)
-plot(enrichment_dotplot)
-
-### Plotting the significantly downregulated genes ### 
-
-downsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
-
-downsig_genes
-
-# first, create a df without duplicate genes (first row is kept and so most important transcript should be kept in the df)
-df <- downsig_genes %>% distinct(ens_gene, .keep_all=TRUE) 
-# check it worked
-dim(df)
-length(unique(downsig_genes$ens_gene)) == dim(df)[1]
-# now re-run enrichGO using these genes instead 
-
-##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
-genes <- df$ens_gene
-head(genes,5)
-genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
-head(genes,10)
-genes <- genes$ENTREZID
-head(genes,5)
-
-genes_all <- unique(dplyr::filter(sleuth_table_txn, !is.na(qval))$ens_gene)
-head(genes_all,5)
-genes_all <- bitr(genes_all, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
-head(genes_all,5)
-genes_all <- genes_all$ENTREZID
-head(genes_all,5)
-
-ego.txn <- enrichGO(gene = genes, 
-                    universe = genes_all,
-                    keyType = "ENTREZID",
-                    OrgDb = org.Hs.eg.db, 
-                    ont = "BP",
-                    pAdjustMethod = "BH", 
-                    qvalueCutoff = 0.05, 
-                    readable = TRUE)
-#repeat quickly the dotplot and emapplot to compare them to the ones produced from the gene table
-#they should be very similar
-enrichment_dotplot <- clusterProfiler::dotplot(ego.txn, 
-                                               x="GeneRatio",
-                                               showCategory = 30)
-plot(enrichment_dotplot)
-
 
 ##Handling the ACP(Non-glial)vsFetalvsNFPA##
 
@@ -540,11 +378,66 @@ length(sleuth_significant_txn$target_id)
 #how many genes correspond to the above transcripts?
 length(unique(sleuth_significant_txn$ens_gene))
 
+##saving the common significant genes##
+
+glial_siggenes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+dim(glial_siggenes)
+
+nonglial_siggenes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+dim(nonglial_siggenes)
+
+common_siggenes <- glial_siggenes[glial_siggenes$target_id %in% nonglial_siggenes$target_id,]
+dim(common_siggenes)
+
+write.table(common_siggenes, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_significantgenes.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
+
+##saving the common significant transcripts##
+
+glial_sigtxn <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_TXN_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+dim(glial_sigtxn)
+
+nonglial_sigtxn <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_TXN_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+dim(nonglial_sigtxn)
+
+common_sigtxn <- glial_sigtxn[glial_sigtxn$target_id %in% nonglial_sigtxn$target_id,]
+dim(common_sigtxn)
+
+write.table(common_sigtxn, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_significanttranscripts.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
+
+##saving the common upregulated transcripts##
+
+glial_upsigtxn <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+dim(glial_upsigtxn)
+
+nonglial_upsigtxn <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+dim(nonglial_upsigtxn)
+
+common_upsigtxn <- glial_upsigtxn[glial_upsigtxn$target_id %in% nonglial_upsigtxn$target_id,]
+dim(common_upsigtxn)
+
+write.table(common_upsigtxn, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_up_significanttranscripts.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
+
+##saving the common downregulated transcripts##
+
+glial_downsigtxn <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+dim(glial_downsigtxn)
+
+nonglial_downsigtxn <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+dim(nonglial_downsigtxn)
+
+common_downsigtxn <- glial_downsigtxn[glial_downsigtxn$target_id %in% nonglial_downsigtxn$target_id,]
+dim(common_downsigtxn)
+
+write.table(common_downsigtxn, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_down_significanttranscripts.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+
 
 ##Run GO enrichment analysis with clusterProfiler##
 
 ##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
-genes <- sleuth_significant_wt$target_id
+genes <- common_siggenes$target_id
 head(genes,5)
 genes <- bitr(genes, fromType="ENSEMBL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
 head(genes,10)
@@ -570,7 +463,7 @@ ego <- enrichGO(gene = genes,
 cluster_summary <- data.frame(ego)
 
 #saving the results#
-write.csv(cluster_summary, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\clusterProfiler_BP.csv")
+write.csv(cluster_summary, file= "C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\clusterProfiler_BP.csv")
 
 #enrichment dotplot
 enrichment_dotplot <- clusterProfiler::dotplot(ego, 
@@ -580,10 +473,10 @@ plot(enrichment_dotplot)
 
 ### GO over-representation analysis with clusterProfiler (using transcript-level sleuth results)
 #first, create a df without duplicate genes (first row is kept and so most important transcript should be kept in the df)
-df <- sleuth_significant_txn %>% distinct(ens_gene, .keep_all=TRUE) 
+df <- common_sigtxn %>% distinct(ens_gene, .keep_all=TRUE) 
 # check it worked
 dim(df)
-length(unique(sleuth_significant_txn$ens_gene)) == dim(df)[1]
+length(unique(common_sigtxn$ens_gene)) == dim(df)[1]
 # now re-run enrichGO using these genes instead 
 
 ##changing the ensembl IDS to entrez IDS to increase the speed of the enrichGO step##
@@ -618,7 +511,7 @@ plot(enrichment_dotplot)
 
 ### Plotting the significantly upregulated genes ###
 
-upsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+upsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_up_significanttranscripts.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
 upsig_genes
 
@@ -661,7 +554,7 @@ plot(enrichment_dotplot)
 
 ### Plotting the significantly downregulated genes ### 
 
-downsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+downsig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_down_significanttranscripts.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
 downsig_genes
 
@@ -750,9 +643,7 @@ plotPCA(rld, intgroup="condition")
 
 ### Plotting the top 10 significantly differentially expressed genes ###
 
-###Plotting for the ACP(Glial)vscontrols###
-
-sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_significanttranscripts.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
 sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
@@ -771,42 +662,15 @@ ggplot(data = top10_sig_genes) +
   scale_y_log10() +
   xlab("gene_symbol") +
   ylab("Log2_foldchange") +
-  ggtitle("Top 10 Significant Differentially Expressed Genes (ACP(Glial)vscontrols)") +
+  ggtitle("Top 10 Significant Differentially Expressed Genes") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
-###Plotting for the ACP(Non_glial)vscontrols###
-
-sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
-
-sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
-
-top_sig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
-
-top10_sig_genes <- top_sig_genes[1:10,]
-
-top10_sig_genes <- dplyr::select(top10_sig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
-
-top10_sig_genes
-
-## plot using ggplot2
-
-ggplot(data = top10_sig_genes) +
-  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "orange", position=position_jitter(w=0.1,h=0)) +
-  scale_y_log10() +
-  xlab("gene_symbol") +
-  ylab("Log2_foldchange") +
-  ggtitle("Top 10 Significant Differentially Expressed Genes (ACP(Nonglial)vscontrols)") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme(plot.title=element_text(hjust=0.5))
 
 ### Plotting the top 10 significantly upregulated genes ###
 
-###Plotting for the ACP(Glial)vscontrols###
-
-sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_up_significanttranscripts.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
 sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
@@ -825,43 +689,15 @@ ggplot(data = top10_upsig_genes) +
   scale_y_log10() +
   xlab("gene_symbol") +
   ylab("Log2_foldchange") +
-  ggtitle("Top 10 Significantly Upregulated Genes (ACP(Glial)vscontrols)") +
+  ggtitle("Top 10 Significantly Upregulated Genes") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
-
-###Plotting for the ACP(Non_glial)vscontrols###
-
-sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_up.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
-
-sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
-
-top_upsig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
-
-top10_upsig_genes <- top_upsig_genes[1:10,]
-
-top10_upsig_genes <- dplyr::select(top10_upsig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
-
-top10_upsig_genes
-
-## plot using ggplot2
-
-ggplot(data = top10_upsig_genes) +
-  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "red", position=position_jitter(w=0.1,h=0)) +
-  scale_y_log10() +
-  xlab("gene_symbol") +
-  ylab("Log2_foldchange") +
-  ggtitle("Top 10 Significantly Upregulated Genes (ACP(Nonglial)vscontrols)") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme(plot.title=element_text(hjust=0.5))
 
 ### Plotting the top 10 significantly downregulated genes ###
 
-###Plotting for the ACP(Glial)vscontrols###
-
-sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Glialvscontrols\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
+sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_common\\common_down_significanttranscripts.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
 
 sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
 
@@ -880,36 +716,11 @@ ggplot(data = top10_downsig_genes) +
   scale_y_log10() +
   xlab("gene_symbol") +
   ylab("Log2_foldchange") +
-  ggtitle("Top 10 Significantly Downregulated Genes (ACP(Glial)vscontrols)") +
+  ggtitle("Top 10 Significantly Downregulated Genes") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title=element_text(hjust=0.5))
 
-###Plotting for the ACP(Non_glial)vscontrols###
-
-sig_genes <- read.table(file.path("C:\\Users\\Asus\\Documents\\rna_seq\\results_variables_4\\results_Nonglialvscontrols\\sleuth_significant_q005_down.txt"), header = TRUE, stringsAsFactors=FALSE, sep = " ")
-
-sig_genes <- sig_genes %>% distinct(ens_gene, .keep_all=TRUE)
-
-top_downsig_genes <- sig_genes[order(sig_genes$qval, -sig_genes$b),]
-
-top10_downsig_genes <- top_downsig_genes[1:10,]
-
-top10_downsig_genes <- dplyr::select(top10_downsig_genes, ensembl_transcriptID = target_id, ensembl_geneID = ens_gene, gene_symbol = ext_gene, q_value = qval, Log2_foldchange = b)
-
-top10_downsig_genes
-
-## plot using ggplot2
-
-ggplot(data = top10_downsig_genes) +
-  geom_point(mapping = aes(x = gene_symbol, y = q_value), color = "green", position=position_jitter(w=0.1,h=0)) +
-  scale_y_log10() +
-  xlab("gene_symbol") +
-  ylab("Log2_foldchange") +
-  ggtitle("Top 10 Significantly Downregulated Genes (ACP(Glial)vscontrols)") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme(plot.title=element_text(hjust=0.5))
 
 
 
