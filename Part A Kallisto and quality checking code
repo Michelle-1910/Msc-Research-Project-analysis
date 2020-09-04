@@ -37,6 +37,7 @@ do
         /s/software/anaconda/python3/bin/cutadapt --trim-n -a "A{100}" -A "A{100}" -o ${sample}_1NEW.fastq.gz -p ${sample}_2NEW.fastq.gz ${sample}_1.fastq.gz ${sample}_2.fastq.gz
 done
 
+########Renaming the fastq files to the original name version######
 
 for sample in `cat list.txt`
 do
