@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#########Written by Michelle Namuyaba (mynamuyaba@gmail.com or mnamuy01@mail.bbk.ac.uk)############
+
 #########Doing quality checking of the reads###########
 
 ##The line of the code below is only specific to the server used in my analysis and is otherwise non essential when you are certain of the absolute path in which the algorithm is located.##
