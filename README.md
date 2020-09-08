@@ -1,5 +1,5 @@
 # Msc-Project
-This code was written for the purpose of analysing 18 Adamantinomatous Craniopharyngioma tumour samples along with three fetal pituitary tissue controls and three non-functioning pituitary adenomas (NFPA) controls.
+This code was written by Michelle Namuyaba (mynamuyaba@gmail.com or mnamuy01@mail.bbk.ac.uk) for the purpose of analysing 18 Adamantinomatous Craniopharyngioma tumour samples along with three fetal pituitary tissue controls and three non-functioning pituitary adenomas (NFPA) controls.
 
 Part A
 This is code for the quality control and transcript abundance quantification.
