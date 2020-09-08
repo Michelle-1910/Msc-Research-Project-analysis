@@ -1,3 +1,6 @@
+########### Written by Michelle Namuyaba (mynamuyaba@gmail.com or mnamuy01@mail.bbk.ac.uk) ################
+
+
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 BiocManager::install()
